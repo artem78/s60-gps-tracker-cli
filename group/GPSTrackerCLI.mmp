@@ -1,0 +1,32 @@
+/*
+============================================================================
+ Name		: GPSTrackerCLI.mmp
+ Author	  : artem78
+ Copyright   : 
+ Description : This is the project specification file for GPSTrackerCLI.
+============================================================================
+*/
+
+TARGET		  GPSTrackerCLI.exe
+TARGETTYPE	  exe
+UID			 0 0xEB199A9B
+
+USERINCLUDE	 ..\inc
+SYSTEMINCLUDE   \epoc32\include
+
+SOURCEPATH	  ..\src
+SOURCE		  GPSTrackerCLI.cpp PositionRequestor.cpp
+
+LIBRARY		 euser.lib lbs.lib
+
+#ifdef ENABLE_ABIV2_MODE
+DEBUGGABLE_UDEBONLY
+#endif
+CAPABILITY Location
+
+SOURCEPATH ..\data
+START RESOURCE GPSTrackerCLI_reg.rss
+	TARGETPATH \private\10003a3f\apps
+END
+SOURCEPATH ..\src
+SOURCE KeyboardActive.cpp

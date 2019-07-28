@@ -1,0 +1,15 @@
+/*
+============================================================================
+ Name		: bld.inf
+ Author	  : artem78
+ Copyright   : 
+ Description : This file provides the information required for building the
+				whole of a GPSTrackerCLI.
+============================================================================
+*/
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_MMPFILES
+GPSTrackerCLI.mmp
