@@ -33,6 +33,9 @@ private:
 	TTime iDisconnectedTime;
 	CPositionRequestor* iPosRequestor;
 	CTrackWriterBase* iTrackWriter;
+	TUint iTotalPointsCount;
+	TReal iTotalDistance;
+	TPosition iLastKnownPosition;
 public:
 	CListener(CConsoleBase* aConsole, CTrackWriterBase* aTrackWriter);
 	void SetPositionRequestor(CPositionRequestor* aPosRequestor);

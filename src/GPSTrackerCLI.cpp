@@ -77,23 +77,36 @@ void CListener::OnDisconnectedL()
 
 void CListener::OnPositionUpdatedL(const TPositionInfo& aPosInfo)
 	{
+	TPosition pos;
+	aPosInfo.GetPosition(pos);
+	
+	// Increment counters
+	iTotalPointsCount++;
+	TReal32 distance;
+	if (iTotalPointsCount > 1) { // Skip first time when iLastKnownPosition is not set yet
+		pos.Distance(iLastKnownPosition, distance);
+		iTotalDistance += distance;
+	}
+	
+	// Save current position as last known
+	iLastKnownPosition = pos;
+	
 	// Write position to file
 	iTrackWriter->AddPoint(aPosInfo);
 	
 	// Write position to the screen
 	//iConsole->Write(_L("Position recieved\n"));
 	
-	TPosition pos;
-	aPosInfo.GetPosition(pos);
 	TBuf<100> timeBuff;
 	pos.Time().FormatL(timeBuff, KTimeFormat);
 	
 	iConsole->ClearScreen();
-	iConsole->Printf(_L("Latitude:\t%f\nLongitude:\t%f\nALtitude:\t%f\n"
-			"Horizontal accuracy:\t%fm\nVertical accuracy:\t%fm\n"
-			"Time:\t%S UTC"),  // ToDo: Move to const
+	iConsole->Printf(_L("Latitude:\t%f\nLongitude:\t%f\nAltitude:\t%.1f m\n"
+			"Horizontal accuracy:\t%.1f m\nVertical accuracy:\t%.1f m\n"
+			"Time:\t%S UTC\nPoints: %d\nDistance: %.2f km"),  // ToDo: Move to const
 			pos.Latitude(), pos.Longitude(), pos.Altitude(),
-			pos.HorizontalAccuracy(), pos.VerticalAccuracy(), &timeBuff);
+			pos.HorizontalAccuracy(), pos.VerticalAccuracy(), &timeBuff,
+			iTotalPointsCount, iTotalDistance / 1000.0 /*m to km*/);
 	iConsole->Write(KTextControl);
 	}
 
@@ -224,7 +237,8 @@ GLDEF_C TInt E32Main()
 		delete cleanup;
 		return createError;
 		}
-
+	console->SetCursorHeight(0); // Hide cursor
+	
 	// Run application code inside TRAP harness, wait keypress when terminated
 	TRAPD(mainError, DoStartL());
 	if (mainError)
