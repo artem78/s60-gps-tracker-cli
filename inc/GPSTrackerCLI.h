@@ -18,6 +18,7 @@
 #include "PositionListener.h"
 #include "KeyboardListener.h"
 #include "PositionRequestor.h"
+#include "TrackWriter.h"
 
 // Constants
 
@@ -31,8 +32,9 @@ private:
 	CConsoleBase* iConsole;
 	TTime iDisconnectedTime;
 	CPositionRequestor* iPosRequestor;
+	CTrackWriterBase* iTrackWriter;
 public:
-	CListener(CConsoleBase* aConsole);
+	CListener(CConsoleBase* aConsole, CTrackWriterBase* aTrackWriter);
 	void SetPositionRequestor(CPositionRequestor* aPosRequestor);
 		// Requestor currently used for start/stop tracking in keyboard control.
 		// Setter used because there is cyclical dependency with requestor class.
