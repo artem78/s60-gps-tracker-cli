@@ -86,6 +86,7 @@ public:
 	static CGPXTrackWriter* NewLC(RFile &aFile);
 	
 	void AddPoint(const TPositionInfo &aPosInfo);
+	void StartNewSegment();
 
 private:
 
@@ -100,6 +101,10 @@ private:
 	void ConstructL();
 	
 	TRealFormat iGeneralRealFormat;
+	TBool iIsSegmentOpened;
+	
+	void OpenSegment();
+	void CloseSegment();
 
 	};
 

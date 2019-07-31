@@ -40,7 +40,7 @@ LOCAL_D CConsoleBase* console; // write all messages to this
 
 //  Classes
 
-CListener::CListener(CConsoleBase* aConsole, CTrackWriterBase* aTrackWriter) :
+CListener::CListener(CConsoleBase* aConsole, /*CTrackWriterBase**/ CGPXTrackWriter* aTrackWriter) :
 	iConsole(aConsole),
 	iTrackWriter(aTrackWriter)
 	{
@@ -73,6 +73,8 @@ void CListener::OnDisconnectedL()
 	iConsole->Write(_L("[ No signal ]\n")); // ToDo: Move to const
 	iConsole->Write(KTextControl);
 	iDisconnectedTime.HomeTime();
+	
+	iTrackWriter->StartNewSegment();
 	}
 
 void CListener::OnPositionUpdatedL(const TPositionInfo& aPosInfo)
@@ -150,6 +152,8 @@ void CListener::OnPauseTracking()
 	iConsole->ClearScreen();
 	iConsole->Printf(_L("[ Positioning paused ]")); // ToDo: Move to const
 	iConsole->Write(KTextControl);
+	
+	//iTrackWriter->StartNewSegment();
 	}
 
 //  Local Functions

@@ -49,8 +49,9 @@ CGPXTrackWriter::CGPXTrackWriter(RFile &aFile) :
 
 CGPXTrackWriter::~CGPXTrackWriter()
 	{
-	_LIT8(KGPXContentEnd, "\t\t</trkseg>\n"
-			"\t</trk>\n"
+	CloseSegment();
+	
+	_LIT8(KGPXContentEnd, "\t</trk>\n"
 			"</gpx>");
 	User::LeaveIfError(iFile.Write(KGPXContentEnd));
 	}
@@ -85,8 +86,7 @@ void CGPXTrackWriter::ConstructL()
 			"<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" version=\"1.1\"\n"
 			"creator=\"\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
 			"xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n"
-			"\t<trk>\n"
-			"\t\t<trkseg>\n");
+			"\t<trk>\n");
 	User::LeaveIfError(iFile.Write(KGPXContentBegining));
 	}
 
@@ -108,6 +108,8 @@ void CGPXTrackWriter::AddPoint(const TPositionInfo &aPosInfo)
 			"\t\t\t\t<time>%S</time>\n"
 			"\t\t\t</trkpt>\n");*/	
 	
+	OpenSegment();
+	
 	//TBufC8<10> buff(_L8()("point\n"));
 	TBuf8<512> buff; // ToDo: Too much for stack
 	//buff.Format(KGPXContentTrackPoint, pos.Latitude(), pos.Longitude(), pos.Altitude(),
@@ -123,4 +125,27 @@ void CGPXTrackWriter::AddPoint(const TPositionInfo &aPosInfo)
 	buff.Append(_L("</time>\n\t\t\t</trkpt>\n"));
 	iFile.Write(buff); // ToDo: Catch possible errors
 		// and rename AddPoint to AddPointL
+	}
+
+void CGPXTrackWriter::StartNewSegment()
+	{
+	CloseSegment();
+	}
+
+void CGPXTrackWriter::OpenSegment()
+	{
+	if (!iIsSegmentOpened)
+		{
+		iFile.Write(_L8("\t\t<trkseg>\n"));
+		iIsSegmentOpened = ETrue;
+		}
+	}
+
+void CGPXTrackWriter::CloseSegment()
+	{
+	if (iIsSegmentOpened)
+		{
+		iFile.Write(_L8("\t\t</trkseg>\n"));
+		iIsSegmentOpened = EFalse;
+		}
 	}

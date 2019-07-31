@@ -32,12 +32,12 @@ private:
 	CConsoleBase* iConsole;
 	TTime iDisconnectedTime;
 	CPositionRequestor* iPosRequestor;
-	CTrackWriterBase* iTrackWriter;
+	/*CTrackWriterBase**/ CGPXTrackWriter* iTrackWriter;
 	TUint iTotalPointsCount;
 	TReal iTotalDistance;
 	TPosition iLastKnownPosition;
 public:
-	CListener(CConsoleBase* aConsole, CTrackWriterBase* aTrackWriter);
+	CListener(CConsoleBase* aConsole, /*CTrackWriterBase**/ CGPXTrackWriter* aTrackWriter);
 	void SetPositionRequestor(CPositionRequestor* aPosRequestor);
 		// Requestor currently used for start/stop tracking in keyboard control.
 		// Setter used because there is cyclical dependency with requestor class.
