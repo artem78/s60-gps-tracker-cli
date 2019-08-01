@@ -95,11 +95,9 @@ void CGPXTrackWriter::AddPoint(const TPositionInfo &aPosInfo)
 	TPosition pos;
 	aPosInfo.GetPosition(pos);
 	
-	TTime now;
-	now.UniversalTime();
 	TBuf/*8*/<30> timeBuff;
 	_LIT/*8*/(KTimeFormatISO8601, "%F%Y-%M-%DT%H:%T:%S.%*C3");
-	now.FormatL(timeBuff, KTimeFormatISO8601);
+	pos.Time().FormatL(timeBuff, KTimeFormatISO8601);
 	//TBuf8<30> timeBuff8;
 	//timeBuff8.Copy(timeBuff);	
 	
