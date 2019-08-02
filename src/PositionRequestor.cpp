@@ -353,8 +353,11 @@ void CDynamicPositionRequestor::RunL()
 						KPositionMaxUpdateInterval);
 				}
 			
-			iUpdateOptions.SetUpdateInterval(updateInterval);
-			iPositioner.SetUpdateOptions(iUpdateOptions); // Update positioner settings
+			if (updateInterval != iUpdateOptions.UpdateInterval())
+				{
+				iUpdateOptions.SetUpdateInterval(updateInterval);
+				iPositioner.SetUpdateOptions(iUpdateOptions); // Update positioner settings
+				}
 			
 			break;
 			}
