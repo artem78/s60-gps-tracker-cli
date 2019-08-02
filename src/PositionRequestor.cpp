@@ -11,23 +11,29 @@
 #include "PositionRequestor.h"
 
 
+// CPositionRequestor
+
 //const TInt KGPSModuleID = 270526858;
 //const TInt KSecond = 1000000;
 //const TInt KDefaultPositionUpdateInterval = /* 5 * */ KSecond;
 //const TInt KDefaultPositionUpdateTimeOut = /*15 * KSecond*/ KPositionUpdateInterval * 5; // TODO: Set value in constructor
+const TInt KPositionMaxUpdateAge = 0;
 
 _LIT(KRequestorString, "MyRequestor"); // ToDo: Change
-
 
 CPositionRequestor::CPositionRequestor(MPositionListener *aListener,
 		TTimeIntervalMicroSeconds aUpdateInterval,
 		TTimeIntervalMicroSeconds aUpdateTimeOut) :
 	CActive(EPriorityStandard), // Standard priority
 	iState(EStopped),
-	iListener(aListener),
-	iUpdateInterval(aUpdateInterval),
-	iUpdateTimeOut(aUpdateTimeOut)
+	iListener(aListener)//,
+	//iUpdateInterval(aUpdateInterval),
+	//iUpdateTimeOut(aUpdateTimeOut)
 	{
+		iUpdateOptions.SetUpdateInterval(aUpdateInterval);
+		iUpdateOptions.SetUpdateTimeOut(aUpdateTimeOut);
+		iUpdateOptions.SetMaxUpdateAge(TTimeIntervalMicroSeconds(KPositionMaxUpdateAge));
+		iUpdateOptions.SetAcceptPartialUpdates(EFalse);
 	}
 
 CPositionRequestor* CPositionRequestor::NewLC(MPositionListener *aPositionListener,
@@ -66,15 +72,8 @@ void CPositionRequestor::ConstructL()
 	//CleanupClosePushL(iPositioner);
 	
 	// 3. Set update options
-	TPositionUpdateOptions updateOpts;
-	// Update the position every 30 sec
-	updateOpts.SetUpdateInterval(iUpdateInterval);
-	// Set update request timeout to 15 seconds
-	updateOpts.SetUpdateTimeOut(iUpdateTimeOut);
-	//updateOpts.SetMaxUpdateAge();
-	//updateOpts.SetAcceptPartialUpdates(ETrue);
 	// Set the options
-	User::LeaveIfError(iPositioner.SetUpdateOptions(updateOpts));
+	User::LeaveIfError(iPositioner.SetUpdateOptions(iUpdateOptions));
 	
 	User::LeaveIfError(
 		iPositioner.SetRequestor(CRequestor::ERequestorService,

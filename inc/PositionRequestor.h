@@ -46,20 +46,25 @@ public:
 	// Function for making the initial request
 	void StartL();
 
-private:
+//private:
+protected: // ToDo: Make all private protected?
 	// C++ constructor
 	CPositionRequestor(MPositionListener *aListener,
 			TTimeIntervalMicroSeconds aUpdateInterval,
 			TTimeIntervalMicroSeconds aUpdateTimeOut);
+	
+//private:
 
 	// Second-phase constructor
 	void ConstructL();
 
-private:
+//private:
+protected:
 	// From CActive
 	// Handle completion
 	void RunL(); // ToDo: Is L really needed?
-
+	
+private:
 	// How to cancel me
 	void DoCancel();
 
@@ -86,15 +91,20 @@ private:
 	MPositionListener *iListener;
 	
 	RPositionServer iPosServer;
+protected:
 	RPositioner iPositioner;
 	
+//protected:
 	TPositionInfo iLastPosInfo;
+	
+private:
 	
 	void SetState(TInt aState);
 	
-	TTimeIntervalMicroSeconds iUpdateInterval;
-	TTimeIntervalMicroSeconds iUpdateTimeOut;
+protected:
+	TPositionUpdateOptions iUpdateOptions;
 
 	};
+
 
 #endif // POSITIONREQUESTOR_H
