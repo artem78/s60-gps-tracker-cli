@@ -351,8 +351,10 @@ void CDynamicPositionRequestor::RunL()
 				}
 			else
 				{
-				updateInterval =
-					TTimeIntervalMicroSeconds(KDistanceBetweenPoints / speed * KSecond);
+				TReal time;
+				User::LeaveIfError(Math::Round(time, KDistanceBetweenPoints / speed, 0)); // Round to seconds
+														// to prevent too often positioner options updated
+				updateInterval = TTimeIntervalMicroSeconds(time * KSecond);
 				// Use range restrictions
 				updateInterval = Min(
 						Max(updateInterval, KPositionMinUpdateInterval),
