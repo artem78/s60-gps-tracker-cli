@@ -31,14 +31,14 @@ class CListener: public CBase, public MPositionListener, public MKeyboardListene
 private:
 	CConsoleBase* iConsole;
 	TTime iDisconnectedTime;
-	CPositionRequestor* iPosRequestor;
+	/*CPositionRequestor**/ CDynamicPositionRequestor* iPosRequestor;
 	/*CTrackWriterBase**/ CGPXTrackWriter* iTrackWriter;
 	TUint iTotalPointsCount;
 	TReal iTotalDistance;
 	TPosition iLastKnownPosition;
 public:
 	CListener(CConsoleBase* aConsole, /*CTrackWriterBase**/ CGPXTrackWriter* aTrackWriter);
-	void SetPositionRequestor(CPositionRequestor* aPosRequestor);
+	void SetPositionRequestor(/*CPositionRequestor**/ CDynamicPositionRequestor* aPosRequestor);
 		// Requestor currently used for start/stop tracking in keyboard control.
 		// Setter used because there is cyclical dependency with requestor class.
 	

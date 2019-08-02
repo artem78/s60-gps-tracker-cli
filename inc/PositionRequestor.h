@@ -107,4 +107,77 @@ protected:
 	};
 
 
+
+/*const TUint KMaxSpeedCalculationPeriod = 60;
+const TUint KDistanceBetweenPoints = 30;
+const TUint KPositionMinUpdateInterval = 1;
+const TUint KPositionMaxUpdateInterval = 30;*/
+
+// Forward declaration
+class CPointsCache;
+
+/*
+ * Automaticaly set position update interval depending on current speed
+ * to preserve approximately equal distance between points 
+ */
+class CDynamicPositionRequestor: public CPositionRequestor
+	{
+public:
+	~CDynamicPositionRequestor();
+	
+	static CDynamicPositionRequestor* NewL(MPositionListener *aListener,
+			TTimeIntervalMicroSeconds aUpdateTimeOut = TTimeIntervalMicroSeconds(KDefaultPositionUpdateTimeOut));
+
+	// Two-phased constructor.
+	static CDynamicPositionRequestor* NewLC(MPositionListener *aListener,
+			TTimeIntervalMicroSeconds aUpdateTimeOut = TTimeIntervalMicroSeconds(KDefaultPositionUpdateTimeOut));
+	
+	/*inline*/ TTimeIntervalMicroSeconds UpdateInterval();
+	
+private:
+	// C++ constructor
+	CDynamicPositionRequestor(MPositionListener *aListener,
+			TTimeIntervalMicroSeconds aUpdateTimeOut);
+	
+	// Second-phase constructor
+	void ConstructL();
+	
+	// From CActive
+	// Handle completion
+	void RunL(); // ToDo: Is L really needed?
+
+	//TReal32 GetMaxSpeedByPeriod(); // Complex getter
+	//TReal32 MaxSpeedDuringPeriod();
+	
+	CPointsCache* iPointsCache;
+	
+	};
+
+/*
+ * Stores positions for the last period and return max speed
+ */
+class CPointsCache: public CBase // ToDo: Optimize
+	{
+public:
+	CPointsCache(TTimeIntervalMicroSeconds aPeriod);
+	~CPointsCache();
+	
+	void AddPoint(const TPosition &aPos);
+	//TReal32 GetMaxSpeed();
+	
+	/* Get max speed from saved points.
+	 * Return KErrNone if there`s no error and error code
+	 * when there are not enouth points to calculate speed (less then 2). 
+	 * @return a Symbian OS error code.
+	 */
+	TInt GetMaxSpeed(TReal32 &aSpeed);
+private:
+	TTimeIntervalMicroSeconds iPeriod;
+	RArray<TPosition> iPoints; // ToDo: What about CCirBuf?
+		// ToDo: Set granylarity
+	
+	void ClearOldPoints();
+	};
+
+
 #endif // POSITIONREQUESTOR_H

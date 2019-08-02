@@ -263,3 +263,165 @@ void CPositionRequestor::SetState(TInt aState)
 	{
 	return iState != EStopped;
 	}
+
+
+
+// CDynamicPositionRequestor
+
+const TUint KMaxSpeedCalculationPeriod	= KSecond * 60;
+//const TUint KPointsCachePeriod			= KSecond * 60;
+const TReal KDistanceBetweenPoints		= 30.0;
+const TUint KPositionMinUpdateInterval	= KSecond * 1;
+const TUint KPositionMaxUpdateInterval	= KSecond * /*30*/ 10;
+
+CDynamicPositionRequestor::CDynamicPositionRequestor(MPositionListener *aListener,
+		TTimeIntervalMicroSeconds aUpdateTimeOut) :
+	CPositionRequestor(aListener, KPositionMinUpdateInterval, aUpdateTimeOut)
+	{
+	}
+
+CDynamicPositionRequestor::~CDynamicPositionRequestor()
+	{
+	delete iPointsCache;
+	
+	// ToDo: Run parent destructor needed?
+	}
+
+CDynamicPositionRequestor* CDynamicPositionRequestor::NewLC(MPositionListener *aPositionListener,
+		TTimeIntervalMicroSeconds aUpdateTimeOut)
+	{
+	CDynamicPositionRequestor* self = new (ELeave) CDynamicPositionRequestor(aPositionListener,
+			aUpdateTimeOut);
+	CleanupStack::PushL(self);
+	self->ConstructL();
+	return self;
+	}
+
+CDynamicPositionRequestor* CDynamicPositionRequestor::NewL(MPositionListener *aPositionListener,
+		TTimeIntervalMicroSeconds aUpdateTimeOut)
+	{
+	CDynamicPositionRequestor* self = CDynamicPositionRequestor::NewLC(aPositionListener,
+			aUpdateTimeOut);
+	CleanupStack::Pop(); // self;
+	return self;
+	}
+
+TTimeIntervalMicroSeconds CDynamicPositionRequestor::UpdateInterval()
+	{
+	return iUpdateOptions.UpdateInterval();
+	}
+
+void CDynamicPositionRequestor::ConstructL()
+	{
+	iPointsCache = new (ELeave) CPointsCache(KMaxSpeedCalculationPeriod);
+	
+	CPositionRequestor::ConstructL(); // Run initialization in parent class
+	}
+
+/*TReal32 CDynamicPositionRequestor::MaxSpeedDuringPeriod()
+	{
+	
+	}*/
+
+void CDynamicPositionRequestor::RunL()
+	{
+	switch (iStatus.Int())
+		{
+		// The fix is valid
+		case KErrNone:
+		//case KPositionQualityLoss:
+			{
+			TPosition pos;
+			iLastPosInfo.GetPosition(pos);
+			
+			iPointsCache->AddPoint(pos);
+			
+			//TReal32 speed = iPointsCache->MaxSpeed();
+			TReal32 speed;
+			TTimeIntervalMicroSeconds updateInterval;
+			if (iPointsCache->GetMaxSpeed(speed) != KErrNone)
+				{
+				updateInterval = KPositionMaxUpdateInterval;
+				}
+			else
+				{
+				updateInterval =
+					TTimeIntervalMicroSeconds(KDistanceBetweenPoints / speed * KSecond);
+				// Use range restrictions
+				updateInterval = Min(
+						Max(updateInterval, KPositionMinUpdateInterval),
+						KPositionMaxUpdateInterval);
+				}
+			
+			iUpdateOptions.SetUpdateInterval(updateInterval);
+			iPositioner.SetUpdateOptions(iUpdateOptions); // Update positioner settings
+			
+			break;
+			}
+		}
+	
+	CPositionRequestor::RunL();
+	}
+
+
+
+// CPointsCache
+
+CPointsCache::CPointsCache(TTimeIntervalMicroSeconds aPeriod) :
+	iPeriod(aPeriod)
+	{
+	// Not needed to initialize iPoints
+	}
+
+CPointsCache::~CPointsCache()
+	{
+	iPoints.Close();
+	}
+
+void CPointsCache::AddPoint(const TPosition &aPos)
+	{
+	ClearOldPoints();
+	
+	iPoints.Append(aPos);
+	}
+	
+//TReal32 CPointsCache::GetMaxSpeed()
+TInt CPointsCache::GetMaxSpeed(TReal32 &aSpeed) 
+	{
+	ClearOldPoints();
+	
+	TUint count = iPoints.Count();
+	
+	if (count < 2)
+		return KErrGeneral; // Can`t calculate speed
+			// ToDo: Use any specific error code
+	
+	//TReal32 maxSpeed = 0;
+	TReal32 speed;
+	for (/*TUint*/ TInt i = /*0*/1; i < count; i++)
+		{
+		//maxSpeed = Max(maxSpeed, iPoints[i].Speed()));
+		iPoints[i].Speed(iPoints[i - 1], speed); // ToDo: What about handling errors?
+		aSpeed = Max(speed, aSpeed);
+		}
+	
+	//return maxSpeed;
+	return KErrNone;
+	}
+
+void CPointsCache::ClearOldPoints()
+	{
+	if (iPoints.Count() == 0)
+		return;
+	
+	TTime time;
+	time.UniversalTime();
+	time -= iPeriod;
+	
+	for (/*TUint*/ TInt i = iPoints.Count() - 1; i >= 0; i--) // Bypass from the end
+		{
+		if (iPoints[i].Time() < time)
+			iPoints.Remove(i);
+		}
+	}
+
