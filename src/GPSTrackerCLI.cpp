@@ -14,6 +14,7 @@
 #include <e32std.h>
 #include <e32cons.h>			// Console
 #include <f32file.h>
+#include <e32debug.h>		// For debug
 
 #include "PositionListener.h"
 #include "PositionRequestor.h"
@@ -93,6 +94,7 @@ void CListener::OnPositionUpdatedL(const TPositionInfo& aPosInfo)
 		
 		pos.Speed(iLastKnownPosition, speed);
 		}
+	RDebug::Print(_L("Current speed %.1f m/s"), speed);
 	
 	// Save current position as last known
 	iLastKnownPosition = pos;

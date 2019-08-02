@@ -18,6 +18,7 @@
 #include <lbs.h>
 #include "PositionListener.h"
 //#pragma comment(lib, "c:\\Symbian\\9.2\\S60_3rd_FP1\\Epoc32\\release\\winscw\\udeb\\lbs.lib") // TODO: Change path to local
+#include <e32debug.h>
 
 
 const TInt KSecond = 1000000;

@@ -133,6 +133,7 @@ void CPositionRequestor::RunL()
         //case KPositionPartialUpdate:
         // case KPositionQualityLoss: // TODO: Maybe uncomment
             {
+            RDebug::Print(_L("Position recieved"));
 
             /*if (iState != EPositionRecieved) {
 				iState = EPositionRecieved;
@@ -193,6 +194,7 @@ void CPositionRequestor::RunL()
             
         case KErrTimedOut:
             {
+            RDebug::Print(_L("Positioning request is timed out"));
             
             /*if (iState != EPositionNotRecieved) {
 				iState = EPositionNotRecieved;
@@ -210,13 +212,17 @@ void CPositionRequestor::RunL()
             
         case KErrCancel:
         	{
+        	RDebug::Print(_L("Positioning request cancelled"));
+        	
         	//setState(EStopped); // Not needed - State already changed in DoCancel
         	break;
         	}
             
         // Unrecoverable errors.
         default:
-            {            
+            {
+            RDebug::Print(_L("Error in RunL: %d"), iStatus.Int());
+            
             SetState(EStopped);
             
             TRAP_IGNORE(
@@ -357,6 +363,7 @@ void CDynamicPositionRequestor::RunL()
 				{
 				iUpdateOptions.SetUpdateInterval(updateInterval);
 				iPositioner.SetUpdateOptions(iUpdateOptions); // Update positioner settings
+				RDebug::Print(_L("Update interval changed to %d ms"), updateInterval.Int64());
 				}
 			
 			break;
@@ -385,6 +392,7 @@ void CPointsCache::AddPoint(const TPosition &aPos)
 	{
 	ClearOldPoints();
 	
+	RDebug::Print(_L("Point added"));
 	iPoints.Append(aPos);
 	}
 	
@@ -396,8 +404,11 @@ TInt CPointsCache::GetMaxSpeed(TReal32 &aSpeed)
 	TUint count = iPoints.Count();
 	
 	if (count < 2)
+		{
+		RDebug::Print(_L("Can`t calculate max speed - not enough points in cache (%d)!"), count);
 		return KErrGeneral; // Can`t calculate speed
 			// ToDo: Use any specific error code
+		}
 	
 	//TReal32 maxSpeed = 0;
 	TReal32 speed;
@@ -409,6 +420,7 @@ TInt CPointsCache::GetMaxSpeed(TReal32 &aSpeed)
 		}
 	
 	//return maxSpeed;
+	RDebug::Print(_L("Max speed: %.1f m/s (total cached points: %d)"), aSpeed, count);
 	return KErrNone;
 	}
 
@@ -421,10 +433,23 @@ void CPointsCache::ClearOldPoints()
 	time.UniversalTime();
 	time -= iPeriod;
 	
+#ifdef __WINS__
+	TUint deletedCount = 0;
+#endif
 	for (/*TUint*/ TInt i = iPoints.Count() - 1; i >= 0; i--) // Bypass from the end
 		{
 		if (iPoints[i].Time() < time)
+			{
 			iPoints.Remove(i);
+#ifdef __WINS__
+			deletedCount++;
+#endif
+			}
 		}
+	
+#ifdef __WINS__
+	if (deletedCount)
+		RDebug::Print(_L("Deleted %d outdated points"), deletedCount);
+#endif
 	}
 
