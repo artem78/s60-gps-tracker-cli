@@ -280,9 +280,8 @@ const TReal KDistanceBetweenPoints		= 30.0;
 const TUint KPositionMinUpdateInterval	= KSecond * 1;
 const TUint KPositionMaxUpdateInterval	= KSecond * /*30*/ 10;
 
-CDynamicPositionRequestor::CDynamicPositionRequestor(MPositionListener *aListener,
-		TTimeIntervalMicroSeconds aUpdateTimeOut) :
-	CPositionRequestor(aListener, KPositionMinUpdateInterval, aUpdateTimeOut)
+CDynamicPositionRequestor::CDynamicPositionRequestor(MPositionListener *aListener) :
+	CPositionRequestor(aListener, KPositionMinUpdateInterval, KPositionMinUpdateInterval + KSecond)
 	{
 	}
 
@@ -293,21 +292,17 @@ CDynamicPositionRequestor::~CDynamicPositionRequestor()
 	// ToDo: Run parent destructor needed?
 	}
 
-CDynamicPositionRequestor* CDynamicPositionRequestor::NewLC(MPositionListener *aPositionListener,
-		TTimeIntervalMicroSeconds aUpdateTimeOut)
+CDynamicPositionRequestor* CDynamicPositionRequestor::NewLC(MPositionListener *aPositionListener)
 	{
-	CDynamicPositionRequestor* self = new (ELeave) CDynamicPositionRequestor(aPositionListener,
-			aUpdateTimeOut);
+	CDynamicPositionRequestor* self = new (ELeave) CDynamicPositionRequestor(aPositionListener);
 	CleanupStack::PushL(self);
 	self->ConstructL();
 	return self;
 	}
 
-CDynamicPositionRequestor* CDynamicPositionRequestor::NewL(MPositionListener *aPositionListener,
-		TTimeIntervalMicroSeconds aUpdateTimeOut)
+CDynamicPositionRequestor* CDynamicPositionRequestor::NewL(MPositionListener *aPositionListener)
 	{
-	CDynamicPositionRequestor* self = CDynamicPositionRequestor::NewLC(aPositionListener,
-			aUpdateTimeOut);
+	CDynamicPositionRequestor* self = CDynamicPositionRequestor::NewLC(aPositionListener);
 	CleanupStack::Pop(); // self;
 	return self;
 	}
@@ -364,6 +359,8 @@ void CDynamicPositionRequestor::RunL()
 			if (updateInterval != iUpdateOptions.UpdateInterval())
 				{
 				iUpdateOptions.SetUpdateInterval(updateInterval);
+				// Update timeout must not be less than update interval
+				iUpdateOptions.SetUpdateTimeOut(updateInterval.Int64() + KSecond);
 				iPositioner.SetUpdateOptions(iUpdateOptions); // Update positioner settings
 				RDebug::Print(_L("Update interval changed to %d ms"), updateInterval.Int64());
 				}

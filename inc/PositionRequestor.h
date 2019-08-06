@@ -127,19 +127,16 @@ class CDynamicPositionRequestor: public CPositionRequestor
 public:
 	~CDynamicPositionRequestor();
 	
-	static CDynamicPositionRequestor* NewL(MPositionListener *aListener,
-			TTimeIntervalMicroSeconds aUpdateTimeOut = TTimeIntervalMicroSeconds(KDefaultPositionUpdateTimeOut));
+	static CDynamicPositionRequestor* NewL(MPositionListener *aListener);
 
 	// Two-phased constructor.
-	static CDynamicPositionRequestor* NewLC(MPositionListener *aListener,
-			TTimeIntervalMicroSeconds aUpdateTimeOut = TTimeIntervalMicroSeconds(KDefaultPositionUpdateTimeOut));
+	static CDynamicPositionRequestor* NewLC(MPositionListener *aListener);
 	
 	/*inline*/ TTimeIntervalMicroSeconds UpdateInterval();
 	
 private:
 	// C++ constructor
-	CDynamicPositionRequestor(MPositionListener *aListener,
-			TTimeIntervalMicroSeconds aUpdateTimeOut);
+	CDynamicPositionRequestor(MPositionListener *aListener);
 	
 	// Second-phase constructor
 	void ConstructL();
