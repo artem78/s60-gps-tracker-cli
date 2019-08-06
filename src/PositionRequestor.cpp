@@ -342,7 +342,7 @@ void CDynamicPositionRequestor::RunL()
 			TTimeIntervalMicroSeconds updateInterval;
 			if (iPointsCache->GetMaxSpeed(speed) != KErrNone)
 				{
-				updateInterval = KPositionMaxUpdateInterval;
+				updateInterval = KPositionMinUpdateInterval;
 				}
 			else
 				{
