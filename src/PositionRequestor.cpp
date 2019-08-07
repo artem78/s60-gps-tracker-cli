@@ -410,6 +410,7 @@ TInt CPointsCache::GetMaxSpeed(TReal32 &aSpeed)
 		}
 	
 	//TReal32 maxSpeed = 0;
+	aSpeed = 0;
 	TReal32 speed;
 	for (/*TUint*/ TInt i = /*0*/1; i < count; i++)
 		{
