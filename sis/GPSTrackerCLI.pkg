@@ -11,14 +11,17 @@
 ;
 ; UID is the exe's UID
 ;
-#{"GPSTrackerCLI EXE"},(0xEB199A9B),1,0,0
+#{"GPS Tracker CLI"},(0xEB199A9B),1,0,0
 
 
 ;Localised Vendor name
-%{"Vendor-EN"}
+%{"artem78 <megabyte1024@ya.ru>"}
 
 ;Unique Vendor name
-:"Vendor"
+:"artem78 <megabyte1024@ya.ru>"
+
+;Platform version
+[0x102032BE], 0, 0, 0, {"S60 3rd Edition FP1 (Symbian 9.2)"}
 
 "$(EPOCROOT)Epoc32\release\$(PLATFORM)\$(TARGET)\GPSTrackerCLI.exe"		  -"!:\sys\bin\GPSTrackerCLI.exe"
 "$(EPOCROOT)Epoc32\data\z\private\10003a3f\apps\GPSTrackerCLI_reg.rsc"   -"!:\private\10003a3f\import\apps\GPSTrackerCLI_reg.rsc"
