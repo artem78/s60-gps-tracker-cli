@@ -23,7 +23,7 @@
 
 //  Constants
 
-_LIT(KTextConsoleTitle, "Console");
+_LIT(KProgramName, "GPS Tracker CLI");
 _LIT(KTextFailed, " failed, leave code = %d");
 //_LIT(KTextPressAnyKey, " [press any key]\n");
 _LIT(KTextPressAnyKeyToQuit, " [press any key to quit]\n");
@@ -243,7 +243,7 @@ GLDEF_C TInt E32Main()
 	CTrapCleanup* cleanup = CTrapCleanup::New();
 
 	// Create output console
-	TRAPD(createError, console = Console::NewL(KTextConsoleTitle, TSize(
+	TRAPD(createError, console = Console::NewL(KProgramName, TSize(
 			KConsFullScreen, KConsFullScreen)));
 	if (createError)
 		{
