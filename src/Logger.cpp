@@ -28,7 +28,7 @@ void Logger::Configure(const RFile &aFile)
 	iIsConfigured = ETrue;
 	}
 
-void Logger::Write(const TDesC8 &aDes)
+void Logger::Write(const TDesC8 &aModule, const TDesC8 &aDes)
 	{
 	if (!iIsConfigured)
 		return;
@@ -48,7 +48,10 @@ void Logger::Write(const TDesC8 &aDes)
 	timeBuff8.Append(timeBuff);
 	iFile.Write(timeBuff8);
 			
-	iFile.Write(_L8("\t"));
+	iFile.Write(KTab);
+	iFile.Write(_L8("["));
+	iFile.Write(aModule);
+	iFile.Write(_L8("]  "));
 	iFile.Write(aDes);
 	iFile.Write(KLineBreak);
 	
@@ -65,7 +68,7 @@ void Logger::Write(const TDesC8 &aDes)
 	//////////
 	}
 
-void Logger::WriteFormat(/*const TDesC8 &aFmt*/ TRefByValue<const TDesC8> aFmt, ...)
+void Logger::WriteFormat(const TDesC8 &aModule, /*const TDesC8 &aFmt*/ TRefByValue<const TDesC8> aFmt, ...)
 	{
 	// ToDo: Add format for date and time
 	if (!iIsConfigured)
@@ -79,7 +82,7 @@ void Logger::WriteFormat(/*const TDesC8 &aFmt*/ TRefByValue<const TDesC8> aFmt, 
 	buff.FormatList(aFmt, list);
 	VA_END(list);
 	
-	Write(buff);
+	Write(aModule, buff);
 	
 	}
 
