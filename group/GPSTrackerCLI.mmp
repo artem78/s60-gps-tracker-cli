@@ -29,4 +29,4 @@ START RESOURCE GPSTrackerCLI_reg.rss
 	TARGETPATH \private\10003a3f\apps
 END
 SOURCEPATH ..\src
-SOURCE KeyboardActive.cpp TrackWriter.cpp
+SOURCE KeyboardActive.cpp TrackWriter.cpp Logger.cpp

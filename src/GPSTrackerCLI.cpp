@@ -14,7 +14,7 @@
 #include <e32std.h>
 #include <e32cons.h>			// Console
 #include <f32file.h>
-#include <e32debug.h>		// For debug
+#include "Logger.h"
 
 #include "PositionListener.h"
 #include "PositionRequestor.h"
@@ -32,6 +32,7 @@ _LIT(KTextControl, "\n\nControl keys:\n   up arrow\t- pause/resume tracking\n   
 //_LIT(KProgramDataDir, "e:\\documents\\GPS Tracker CLI\\");
 _LIT(KProgramDataDir, "c:\\data\\GPSTracker\\"); // ToDo: Use drive wnere program is installed
 _LIT(KTracksDir, "c:\\data\\GPSTracker\\tracks\\"); // TODO: Make this path relative
+_LIT(KLogsDir, "c:\\data\\GPSTracker\\logs\\"); // TODO: Make this path relative
 _LIT(KTimeFormatForFileName, "%F%Y%M%D_%H%T%S");
 
 //  Global Variables
@@ -94,7 +95,7 @@ void CListener::OnPositionUpdatedL(const TPositionInfo& aPosInfo)
 		
 		pos.Speed(iLastKnownPosition, speed);
 		}
-	RDebug::Print(_L("Current speed %.1f m/s"), speed);
+	LOG(_L8("Current speed %.1f m/s"), speed);
 	
 	// Save current position as last known
 	iLastKnownPosition = pos;
@@ -133,6 +134,7 @@ void CListener::OnKeyPressed(TKeyCode aKeyCode)
 		{
 		case EKeyDownArrow:
 			{
+			LOG(_L8("Program exit"));
 			CActiveScheduler::Stop(); // Exit
 			break;
 			}
@@ -181,12 +183,32 @@ LOCAL_C void MainL()
 	res = fs.MkDir(KTracksDir);
 	if (res != KErrNone && res != KErrAlreadyExists)
 		User::Leave(res);
+	res = fs.MkDir(KLogsDir);
+	if (res != KErrNone && res != KErrAlreadyExists)
+		User::Leave(res);
 	
-	// Create gpx file for writing track
 	TTime now;
 	now.HomeTime();
 	TBuf<20> timeBuff;
 	now.FormatL(timeBuff, KTimeFormatForFileName);
+	
+	// Configure logging
+	TFileName logFileName;
+	logFileName.Append(KLogsDir);
+#ifndef __WINS__
+	logFileName.Append(_L("log_"));
+	logFileName.Append(timeBuff);
+#else
+	logFileName.Append(_L("log"));
+#endif
+	logFileName.Append(_L(".txt"));
+	RFile logFile;
+	User::LeaveIfError(logFile./*Create*/Replace(fs, logFileName, EFileWrite));
+	CleanupClosePushL(logFile);
+	LOG_CONFIGURE(logFile);
+	LOG(_L8("Log started"));
+	
+	// Create gpx file for writing track
 	TFileName gpxFileName;
 	gpxFileName.Append(KTracksDir);
 	gpxFileName.Append(_L("track_"));

@@ -9,6 +9,7 @@
  */
 
 #include "PositionRequestor.h"
+#include "Logger.h"
 
 
 // CPositionRequestor
@@ -59,6 +60,7 @@ CPositionRequestor* CPositionRequestor::NewL(MPositionListener *aPositionListene
 
 void CPositionRequestor::ConstructL()
 	{
+	LOG(_L8("Position requestor created"));
 	//User::LeaveIfError(iTimer.CreateLocal()); // Initialize timer
 	
 	// 1. Create a session with the location server
@@ -90,10 +92,12 @@ CPositionRequestor::~CPositionRequestor()
 	// Delete instance variables if any
 	iPositioner.Close();
 	iPosServer.Close();
+	LOG(_L8("Position requestor deleted"));
 	}
 
 void CPositionRequestor::DoCancel()
 	{
+	LOG(_L8("Position requestor cancelled"));
 	//iTimer.Cancel();
 	//iPositioner.
 	iPositioner.CancelRequest(/*EPositionerGetLastKnownPosition*/ EPositionerNotifyPositionUpdate);
@@ -104,6 +108,7 @@ void CPositionRequestor::DoCancel()
 
 void CPositionRequestor::StartL()
 	{
+	LOG(_L8("Requestor started"));
 	Cancel(); // Cancel any request, just to be sure
 	//iState = EPositionNotRecieved;
 	//iTimer.After(iStatus, aDelay); // Set for later
@@ -133,7 +138,7 @@ void CPositionRequestor::RunL()
         //case KPositionPartialUpdate:
         // case KPositionQualityLoss: // TODO: Maybe uncomment
             {
-            RDebug::Print(_L("Position recieved"));
+            LOG(_L8("Position recieved"));
 
             /*if (iState != EPositionRecieved) {
 				iState = EPositionRecieved;
@@ -194,7 +199,7 @@ void CPositionRequestor::RunL()
             
         case KErrTimedOut:
             {
-            RDebug::Print(_L("Positioning request is timed out"));
+            LOG(_L8("Positioning request is timed out"));
             
             /*if (iState != EPositionNotRecieved) {
 				iState = EPositionNotRecieved;
@@ -212,7 +217,7 @@ void CPositionRequestor::RunL()
             
         case KErrCancel:
         	{
-        	RDebug::Print(_L("Positioning request cancelled"));
+        	LOG(_L8("Positioning request cancelled"));
         	
         	//setState(EStopped); // Not needed - State already changed in DoCancel
         	break;
@@ -221,7 +226,7 @@ void CPositionRequestor::RunL()
         // Unrecoverable errors.
         default:
             {
-            RDebug::Print(_L("Error in RunL: %d"), iStatus.Int());
+            LOG(_L8("Error in RunL: %d"), iStatus.Int());
             
             SetState(EStopped);
             
@@ -334,6 +339,15 @@ void CDynamicPositionRequestor::RunL()
 			{
 			TPosition pos;
 			iLastPosInfo.GetPosition(pos);
+			//Logger::WriteEmptyLine();
+			/*TBuf<20> timeBuff1;
+			pos.Time().FormatL(timeBuff1, KLogTimeFormat);
+			TBuf8<20> timeBuff8_1;
+			timeBuff8_1.Copy(timeBuff1);*/
+			//LOG(_L8("Current position: lat=%f lon=%f alt=%f time=%S"),
+			//		pos.Latitude(), pos.Longitude(), pos.Altitude(), &timeBuff8_1);
+			LOG(_L8("Current position: lat=%f lon=%f alt=%f"),
+					pos.Latitude(), pos.Longitude(), pos.Altitude());
 			
 			iPointsCache->AddPoint(pos);
 			
@@ -342,13 +356,19 @@ void CDynamicPositionRequestor::RunL()
 			TTimeIntervalMicroSeconds updateInterval;
 			if (iPointsCache->GetMaxSpeed(speed) != KErrNone)
 				{
+				LOG(_L8("No max speed!"));
 				updateInterval = KPositionMinUpdateInterval;
 				}
 			else
 				{
+				LOG(_L8("Max speed=%f m/s"), speed);
 				TReal time;
-				User::LeaveIfError(Math::Round(time, KDistanceBetweenPoints / speed, 0)); // Round to seconds
-														// to prevent too often positioner options updated
+				TInt err = Math::Round(time, KDistanceBetweenPoints / speed, 0); // Round to seconds
+							// to prevent too often positioner options updated
+				if (err != KErrNone)
+					LOG(_L8("Time Round error"));
+				User::LeaveIfError(err);
+
 				updateInterval = TTimeIntervalMicroSeconds(time * KSecond);
 				// Use range restrictions
 				updateInterval = Min(
@@ -362,7 +382,7 @@ void CDynamicPositionRequestor::RunL()
 				// Update timeout must not be less than update interval
 				iUpdateOptions.SetUpdateTimeOut(updateInterval.Int64() + KSecond);
 				iPositioner.SetUpdateOptions(iUpdateOptions); // Update positioner settings
-				RDebug::Print(_L("Update interval changed to %d ms"), updateInterval.Int64());
+				LOG(_L8("Update interval changed to %d s"), updateInterval.Int64() / KSecond);
 				}
 			
 			break;
@@ -391,7 +411,7 @@ void CPointsCache::AddPoint(const TPosition &aPos)
 	{
 	ClearOldPoints();
 	
-	RDebug::Print(_L("Point added"));
+	LOG(_L8("Point added to cache"));
 	iPoints.Append(aPos);
 	}
 	
@@ -404,7 +424,7 @@ TInt CPointsCache::GetMaxSpeed(TReal32 &aSpeed)
 	
 	if (count < 2)
 		{
-		RDebug::Print(_L("Can`t calculate max speed - not enough points in cache (%d)!"), count);
+		LOG(_L8("Can`t calculate max speed - not enough points in cache (%d)!"), count);
 		return KErrGeneral; // Can`t calculate speed
 			// ToDo: Use any specific error code
 		}
@@ -420,7 +440,7 @@ TInt CPointsCache::GetMaxSpeed(TReal32 &aSpeed)
 		}
 	
 	//return maxSpeed;
-	RDebug::Print(_L("Max speed: %.1f m/s (total cached points: %d)"), aSpeed, count);
+	LOG(_L8("Max speed: %.1f m/s (total cached points: %d)"), aSpeed, count);
 	return KErrNone;
 	}
 
@@ -449,7 +469,7 @@ void CPointsCache::ClearOldPoints()
 	
 #ifdef __WINS__
 	if (deletedCount)
-		RDebug::Print(_L("Deleted %d outdated points"), deletedCount);
+		LOG(_L8("Deleted %d outdated points"), deletedCount);
 #endif
 	}
 
