@@ -242,7 +242,11 @@ LOCAL_C void MainL()
 	//console->Write(_L("Press any key to stop\n"));
 	//console->Getch();
 	
+#if LOGGING_ENABLED
+	CleanupStack::PopAndDestroy(7, &fs); // logFile added
+#else
 	CleanupStack::PopAndDestroy(6, &fs);
+#endif
 	}
 
 LOCAL_C void DoStartL()
