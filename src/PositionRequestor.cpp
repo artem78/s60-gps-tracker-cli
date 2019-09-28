@@ -362,18 +362,26 @@ void CDynamicPositionRequestor::RunL()
 			else
 				{
 				LOG(_L8("Max speed=%f m/s"), speed);
-				TReal time;
-				TInt err = Math::Round(time, KDistanceBetweenPoints / speed, 0); // Round to seconds
-							// to prevent too often positioner options updated
-				if (err != KErrNone)
-					LOG(_L8("Time Round error"));
-				User::LeaveIfError(err);
+				TReal time = KDistanceBetweenPoints / speed;
+				if (Math::IsFinite(time)) // i.e. speed > 0
+					{
+					TInt err = Math::Round(time, time, 0); // Round to seconds
+								// to prevent too often positioner options updated
+					if (err != KErrNone)
+						LOG(_L8("Time Round error"));
+					User::LeaveIfError(err);
 
-				updateInterval = TTimeIntervalMicroSeconds(time * KSecond);
-				// Use range restrictions
-				updateInterval = Min(
-						Max(updateInterval, KPositionMinUpdateInterval),
-						KPositionMaxUpdateInterval);
+					updateInterval = TTimeIntervalMicroSeconds(time * KSecond);
+					// Use range restrictions
+					updateInterval = Min(
+							Max(updateInterval, KPositionMinUpdateInterval),
+							KPositionMaxUpdateInterval);
+					}
+				else
+					{
+					LOG(_L8("Error calculating position update time - set it to max value"));
+					updateInterval = KPositionMaxUpdateInterval;
+					}
 				}
 			
 			if (updateInterval != iUpdateOptions.UpdateInterval())
