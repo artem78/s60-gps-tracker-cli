@@ -30,3 +30,5 @@ START RESOURCE GPSTrackerCLI_reg.rss
 END
 SOURCEPATH ..\src
 SOURCE KeyboardActive.cpp TrackWriter.cpp Logger.cpp
+
+MACRO LOGGING_ENABLED=1

@@ -193,6 +193,7 @@ LOCAL_C void MainL()
 	now.FormatL(timeBuff, KTimeFormatForFileName);
 	
 	// Configure logging
+#if LOGGING_ENABLED
 	TFileName logFileName;
 	logFileName.Append(KLogsDir);
 #ifndef __WINS__
@@ -207,6 +208,7 @@ LOCAL_C void MainL()
 	CleanupClosePushL(logFile);
 	LOG_CONFIGURE(logFile);
 	LOG(_L8("Log started"));
+#endif
 	
 	// Create gpx file for writing track
 	TFileName gpxFileName;
