@@ -14,9 +14,16 @@
 #include <f32file.h>
 
 
-// Check that ENABLE_LOGGING is defined
+/*// Check that ENABLE_LOGGING is defined
 #ifndef LOGGING_ENABLED
 #warning LOGGING_ENABLED not defined!
+#define LOGGING_ENABLED 0
+#endif*/
+
+// Enable logging only in Debug-builds
+#ifdef _DEBUG
+#define LOGGING_ENABLED 1
+#else
 #define LOGGING_ENABLED 0
 #endif
 
