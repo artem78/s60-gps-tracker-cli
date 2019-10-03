@@ -13,3 +13,4 @@ DEFAULT
 
 PRJ_MMPFILES
 GPSTrackerCLI.mmp
+gnumakefile GPSTrackerCLI_icons.mk

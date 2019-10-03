@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" baseProfile="tiny" fill-rule="evenodd" height="100px" version="1.1" viewBox="0 0 69 69" width="100px">
+<defs>
+<linearGradient gradientUnits="userSpaceOnUse" id="id1" x1="44.0824" x2="17.871" y1="9.70545" y2="42.1582">
+<stop offset="0" stop-color="#CCCCCC"/>
+<stop offset="0.380392" stop-color="#E5E5E5"/>
+<stop offset="1" stop-color="#FEFEFE"/>
+</linearGradient>
+<linearGradient gradientUnits="userSpaceOnUse" id="id2" x1="31.584" x2="35.0827" y1="27.4849" y2="22.9758">
+<stop offset="0" stop-color="#999999"/>
+<stop offset="0.741176" stop-color="#E6E6E6"/>
+<stop offset="1" stop-color="#CCCCCC"/>
+</linearGradient>
+<linearGradient gradientUnits="userSpaceOnUse" id="id3" x1="14.1592" x2="16.3485" y1="16.833" y2="13.0333">
+<stop offset="0" stop-color="#999999"/>
+<stop offset="0.580392" stop-color="white"/>
+<stop offset="1" stop-color="#CCCCCC"/>
+</linearGradient>
+</defs>
+<g>
+<g/>
+<g>
+<g>
+<polygon fill="#D1D1D1" points="30,63 35,37 43,37 49,62 "/>
+<polygon fill="#EBEBEB" points="38,37 35,62 44,62 41,37 "/>
+<ellipse fill="#999999" rx="15" ry="21" transform="matrix(1 -0 -0.436993 1 34.6752 26.3682)"/>
+<path d="M42 4c8,0 11,9 6,21 -5,12 -16,21 -24,21 -8,0 -11,-9 -6,-21 5,-12 16,-21 24,-21z" fill="url(#id1)"/>
+<line fill="none" stroke="#999999" stroke-width="0.329322" x1="25" x2="16" y1="37" y2="17"/>
+<line fill="none" stroke="#999999" stroke-width="0.329322" x1="40" x2="18" y1="13" y2="14"/>
+<line fill="none" stroke="#999999" stroke-width="0.329322" x1="25" x2="17" y1="22" y2="16"/>
+<path d="M34 21l-4 5 3 2c3,0 4,-2 4,-5l-3 -2z" fill="url(#id2)"/>
+<ellipse fill="white" rx="2" ry="3" transform="matrix(1 -0 -0.373391 1 31.7551 23.972)"/>
+<line fill="none" stroke="#999999" stroke-width="0.329322" x1="38" x2="17" y1="27" y2="16"/>
+<path d="M15 12c-2,1 -3,2 -2,4l3 1c2,-1 2,-2 2,-4l-3 -1z" fill="url(#id3)"/>
+<rect fill="#999999" height="3.61727" width="26.2292" x="27" y="61"/>
+</g>
+</g>
+<polygon fill="none" points="69,69 0,69 0,0 69,0 "/>
+</g>
+</svg>

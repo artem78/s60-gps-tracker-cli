@@ -24,9 +24,14 @@ DEBUGGABLE_UDEBONLY
 #endif
 CAPABILITY Location
 
+SOURCEPATH ..\src
+SOURCE KeyboardActive.cpp TrackWriter.cpp Logger.cpp
+SOURCEPATH ..\data
+START RESOURCE GPSTrackerCLI.rss
+	TARGETPATH \resource\apps
+	HEADER
+END
 SOURCEPATH ..\data
 START RESOURCE GPSTrackerCLI_reg.rss
 	TARGETPATH \private\10003a3f\apps
 END
-SOURCEPATH ..\src
-SOURCE KeyboardActive.cpp TrackWriter.cpp Logger.cpp

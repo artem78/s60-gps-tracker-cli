@@ -1,4 +1,5 @@
 #include <appinfo.rh>
+#include "GPSTrackerCLI.rsg"
 
 UID2 KUidAppRegistrationResourceFile
 UID3 0xEB199A9B
@@ -6,5 +7,7 @@ UID3 0xEB199A9B
 RESOURCE APP_REGISTRATION_INFO
     {
     app_file = "GPSTrackerCLI";
+    localisable_resource_file = "\\resource\\apps\\GPSTrackerCLI";
+    localisable_resource_id = R_LOCALISABLE_APP_INFO;
     }
 

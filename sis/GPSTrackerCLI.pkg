@@ -25,5 +25,6 @@
 
 "$(EPOCROOT)Epoc32\release\$(PLATFORM)\$(TARGET)\GPSTrackerCLI.exe"		  -"!:\sys\bin\GPSTrackerCLI.exe"
 "$(EPOCROOT)Epoc32\data\z\private\10003a3f\apps\GPSTrackerCLI_reg.rsc"   -"!:\private\10003a3f\import\apps\GPSTrackerCLI_reg.rsc"
-
+"$(EPOCROOT)Epoc32\data\z\resource\apps\GPSTrackerCLI.rsc"-"!:\resource\apps\GPSTrackerCLI.rsc"
+"$(EPOCROOT)Epoc32\data\z\resource\apps\GPSTrackerCLI.mif"-"!:\resource\apps\GPSTrackerCLI.mif"
 
