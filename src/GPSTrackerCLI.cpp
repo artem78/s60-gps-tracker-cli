@@ -36,12 +36,43 @@ _LIT(KTextFailed, " failed, leave code = %d");
 //_LIT(KTextPressAnyKey, " [press any key]\n");
 _LIT(KTextPressAnyKeyToQuit, " [press any key to quit]\n");
 //_LIT(KTextBye, "Bye!\n");
-_LIT(KTextControl, "\n\nControl keys:\n   up arrow\t- pause/resume tracking\n   down arrow\t- exit\n");
+_LIT(KTextControl1, "\n\nControl keys:\n   up arrow\t- ");
+_LIT(KTextControl2, " track recording\n   down arrow\t- exit\n");
+_LIT(KTextPause, "pause");
+_LIT(KTextResume, "resume");
 //_LIT(KProgramDataDir, "e:\\documents\\GPS Tracker CLI\\");
 _LIT(KProgramDataDir, "c:\\data\\GPSTracker\\"); // ToDo: Use drive wnere program is installed
 _LIT(KTracksDir, "c:\\data\\GPSTracker\\tracks\\"); // TODO: Make this path relative
 _LIT(KLogsDir, "c:\\data\\GPSTracker\\logs\\"); // TODO: Make this path relative
 _LIT(KTimeFormatForFileName, "%F%Y%M%D_%H%T%S");
+
+// For screen output
+_LIT(KTextNoValue, "---");
+_LIT(KTextLat, "Latitude: ");
+_LIT(KTextLon, "Longitude: ");
+_LIT(KTextAlt, "Altitude: ");
+_LIT(KTextHAcc, "Horizontal accuracy: ");
+_LIT(KTextVAcc, "Vertical accuracy: ");
+_LIT(KTextTime, "Time: ");
+_LIT(KTextSpeed, "Speed: ");
+_LIT(KTextPointsCount, "Saved points: ");
+_LIT(KTextTotalDistance, "Odometer: ");
+_LIT(KTextPosUpdateInterval, "Position refresh rate: ");
+
+const TChar KSpace = TChar(0x20);
+const TChar KLineBreak = TChar(0x0A);
+
+_LIT(KMetresUnit, "m");
+_LIT(KKilometersUnit, "km");
+#ifdef _DEBUG
+_LIT(KMetresPerSecondsUnit, "m/s");
+#endif
+_LIT(KKilometersPerHourUnit, "km/h");
+_LIT(KSecondsUnit, "s");
+
+_LIT(KTextNoPosition, "[ Waiting for GPS signal... ]");
+_LIT(KTextTrackingPaused, "[ Track recording paused ]");
+
 
 //  Global Variables
 
@@ -63,6 +94,155 @@ void CListener::SetPositionRequestor(/*CPositionRequestor**/ CDynamicPositionReq
 	iPosRequestor = aPosRequestor;
 	}
 
+void CListener::ShowDataL()
+	{	
+	const TInt KLabelMaxWidth = 23;
+	TRealFormat shortRealFmt = TRealFormat(10, 1);
+	TRealFormat longRealFmt = TRealFormat(10, 5);
+	_LIT(KUTC, "UTC");
+	
+	RBuf buff;
+	buff.CreateL(1024);
+	buff.CleanupClosePushL();
+	
+	// Messages
+	//buff.Append(KLineBreak);
+	TSize consoleSize = iConsole->ScreenSize();
+	if (!iPosRequestor->IsRunning())
+		buff.AppendJustify(KTextTrackingPaused, consoleSize.iWidth, ECenter, KSpace);
+	else if (iPosRequestor->State() != CPositionRequestor::EPositionRecieved)
+		buff.AppendJustify(KTextNoPosition, consoleSize.iWidth, ECenter, KSpace);
+	else
+		buff.Append(KLineBreak);
+	buff.Append(KLineBreak);
+	
+	
+	// Latitude
+	buff.AppendJustify(KTextLat, KLabelMaxWidth, ERight, KSpace);
+	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+		buff.AppendNum(iLastKnownPosition.Latitude(), longRealFmt);
+	else
+		buff.Append(KTextNoValue);
+	buff.Append(KLineBreak);
+	
+	// Longitude
+	buff.AppendJustify(KTextLon, KLabelMaxWidth, ERight, KSpace);
+	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+		buff.AppendNum(iLastKnownPosition.Longitude(), longRealFmt);
+	else
+		buff.Append(KTextNoValue);
+	buff.Append(KLineBreak);
+	
+	// Altitude
+	buff.AppendJustify(KTextAlt, KLabelMaxWidth, ERight, KSpace);
+	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+		{
+		buff.AppendNum(iLastKnownPosition.Altitude(), shortRealFmt);
+		buff.Append(KSpace);
+		buff.Append(KMetresUnit);
+		}
+	else
+		buff.Append(KTextNoValue);
+	buff.Append(KLineBreak);
+	
+	// Horizontal accuracy
+	buff.AppendJustify(KTextHAcc, KLabelMaxWidth, ERight, KSpace);
+	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+		{
+		buff.AppendNum(iLastKnownPosition.HorizontalAccuracy(), shortRealFmt);
+		buff.Append(KSpace);
+		buff.Append(KMetresUnit);
+		}
+	else
+		buff.Append(KTextNoValue);
+	buff.Append(KLineBreak);
+	
+	// Vertical accuracy
+	buff.AppendJustify(KTextVAcc, KLabelMaxWidth, ERight, KSpace);
+	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+		{
+		buff.AppendNum(iLastKnownPosition.VerticalAccuracy(), shortRealFmt);
+		buff.Append(KSpace);
+		buff.Append(KMetresUnit);
+		}
+	else
+		buff.Append(KTextNoValue);
+	buff.Append(KLineBreak);
+	
+	// Time
+	buff.AppendJustify(KTextTime, KLabelMaxWidth, ERight, KSpace);
+	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+		{
+		TBuf<20> timeBuff;
+		iLastKnownPosition.Time().FormatL(timeBuff, KTimeFormat);
+		buff.Append(timeBuff);
+		buff.Append(KSpace);
+		buff.Append(KUTC);
+		}
+	else
+		buff.Append(KTextNoValue);
+	buff.Append(KLineBreak);
+	
+	// Speed
+	buff.AppendJustify(KTextSpeed, KLabelMaxWidth, ERight, KSpace);
+	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+		{
+		buff.AppendNum(iSpeed * 3.6, shortRealFmt);
+		buff.Append(KSpace);
+		buff.Append(KKilometersPerHourUnit);
+#ifdef _DEBUG
+		buff.Append(KSpace);
+		buff.Append(TChar(0x28));
+		buff.AppendNum(iSpeed, /*shortRealFmt*/ longRealFmt);
+		buff.Append(KSpace);
+		buff.Append(KMetresPerSecondsUnit);
+		buff.Append(TChar(0x29));
+#endif
+		}
+	else
+		buff.Append(KTextNoValue);
+	buff.Append(KLineBreak);
+	
+	// Total points count
+	buff.AppendJustify(KTextPointsCount, KLabelMaxWidth, ERight, KSpace);
+	buff.AppendNum(iTotalPointsCount);
+	buff.Append(KLineBreak);
+	
+	// Total distance
+	buff.AppendJustify(KTextTotalDistance, KLabelMaxWidth, ERight, KSpace);
+	buff.AppendNum(iTotalDistance / 1000.0, shortRealFmt);
+	buff.Append(KSpace);
+	buff.Append(KKilometersUnit);
+	buff.Append(KLineBreak);
+	
+	// Update interval
+	buff.AppendJustify(KTextPosUpdateInterval, KLabelMaxWidth, ERight, KSpace);
+	if (iPosRequestor->IsRunning())
+		{
+		buff.AppendNum(iPosRequestor->UpdateInterval().Int64() / KSecond);
+		buff.Append(KSpace);
+		buff.Append(KSecondsUnit);
+		}
+	else
+		buff.Append(KTextNoValue);
+	buff.Append(KLineBreak);
+
+	
+	// Controls information
+	buff.Append(KTextControl1);
+	if (iPosRequestor->IsRunning())
+		buff.Append(KTextPause);
+	else
+		buff.Append(KTextResume);
+	buff.Append(KTextControl2);
+	
+	
+	iConsole->ClearScreen();
+	iConsole->Write(buff);
+	
+	CleanupStack::PopAndDestroy(&buff);
+	}
+
 void CListener::OnConnectedL()
 	{
 	/*TTime now;
@@ -77,11 +257,8 @@ void CListener::OnConnectedL()
 
 void CListener::OnDisconnectedL()
 	{
-	//iConsole->Write(_L("Disconnected\n"));
-	
-	iConsole->ClearScreen();
-	iConsole->Write(_L("[ No signal ]\n")); // ToDo: Move to const
-	iConsole->Write(KTextControl);
+	ShowDataL();
+
 	iDisconnectedTime.HomeTime();
 	
 	iTrackWriter->StartNewSegment();
@@ -95,15 +272,15 @@ void CListener::OnPositionUpdatedL(const TPositionInfo& aPosInfo)
 	// Increment counters and calculate speed
 	iTotalPointsCount++;
 	TReal32 distance = 0;
-	TReal32 speed = 0;
+	iSpeed = 0;
 	if (iTotalPointsCount > 1) // Skip first time when iLastKnownPosition is not set yet
 		{
 		pos.Distance(iLastKnownPosition, distance);
 		iTotalDistance += distance;
 		
-		pos.Speed(iLastKnownPosition, speed);
+		pos.Speed(iLastKnownPosition, iSpeed);
 		}
-	LOG(_L8("Current speed %.1f m/s"), speed);
+	LOG(_L8("Current speed %.1f m/s"), iSpeed);
 	
 	// Save current position as last known
 	iLastKnownPosition = pos;
@@ -111,23 +288,8 @@ void CListener::OnPositionUpdatedL(const TPositionInfo& aPosInfo)
 	// Write position to file
 	iTrackWriter->AddPoint(aPosInfo);
 	
-	// Write position to the screen
-	//iConsole->Write(_L("Position recieved\n"));
-	
-	TBuf<100> timeBuff;
-	pos.Time().FormatL(timeBuff, KTimeFormat);
-	
-	iConsole->ClearScreen();
-	iConsole->Printf(_L("Latitude:\t%f\nLongitude:\t%f\nAltitude:\t%.1f m\n"
-			"Horizontal accuracy:\t%.1f m\nVertical accuracy:\t%.1f m\n"
-			"Time:\t%S UTC\nPoints: %d\nDistance: %.2f km\nUpdate interval: %.1f s\n"
-			"Speed: %.1f k/h (%d m/s)"),  // ToDo: Move to const
-			pos.Latitude(), pos.Longitude(), pos.Altitude(),
-			pos.HorizontalAccuracy(), pos.VerticalAccuracy(), &timeBuff,
-			iTotalPointsCount, iTotalDistance / 1000.0 /*m to km*/,
-			TReal(iPosRequestor->UpdateInterval().Int64()) / KSecond,
-			speed * 3.6 /* mps to kph */, TInt(speed));
-	iConsole->Write(KTextControl);
+	// Write position to the screen	
+	ShowDataL();
 	}
 
 void CListener::OnErrorL(TInt aErrCode)
@@ -155,9 +317,12 @@ void CListener::OnKeyPressed(TKeyCode aKeyCode)
 				OnPauseTracking();
 				}
 			else
+				{
 				TRAP_IGNORE(
 						iPosRequestor->StartL();
 				);
+				OnResumeTracking();
+				}
 			break;
 			}
 			
@@ -168,11 +333,14 @@ void CListener::OnKeyPressed(TKeyCode aKeyCode)
 
 void CListener::OnPauseTracking()
 	{
-	iConsole->ClearScreen();
-	iConsole->Printf(_L("[ Positioning paused ]")); // ToDo: Move to const
-	iConsole->Write(KTextControl);
+	ShowDataL();
 	
 	//iTrackWriter->StartNewSegment();
+	}
+
+void CListener::OnResumeTracking()
+	{
+	ShowDataL();
 	}
 
 //  Local Functions

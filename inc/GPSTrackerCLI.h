@@ -22,7 +22,8 @@
 
 // Constants
 
-_LIT(KTimeFormat, "%H:%T:%S.%C");
+_LIT(KTimeFormat, "%H:%T:%S");
+//_LIT(KTimeFormatWithMS, "%H:%T:%S.%C");
 
 // Classes
 
@@ -36,6 +37,9 @@ private:
 	TUint iTotalPointsCount;
 	TReal iTotalDistance;
 	TPosition iLastKnownPosition;
+	TReal32 iSpeed;
+	
+	void ShowDataL();
 public:
 	CListener(CConsoleBase* aConsole, /*CTrackWriterBase**/ CGPXTrackWriter* aTrackWriter);
 	void SetPositionRequestor(/*CPositionRequestor**/ CDynamicPositionRequestor* aPosRequestor);
@@ -49,6 +53,7 @@ public:
 	void OnErrorL(TInt aErrCode);
 	void OnKeyPressed(TKeyCode aKeyCode);
 	void OnPauseTracking();
+	void OnResumeTracking();
 	};
 
 //  Function Prototypes

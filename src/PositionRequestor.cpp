@@ -247,7 +247,7 @@ void CPositionRequestor::RunL()
 	return aError;
 	}*/
 	
-inline TInt CPositionRequestor::State() const
+/*inline*/ TInt CPositionRequestor::State() const
 	{
 	return iState;
 	}

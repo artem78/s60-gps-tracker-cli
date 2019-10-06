@@ -74,7 +74,7 @@ private:
 	// the active scheduler to panic.
 	//TInt RunError(TInt aError);
 
-private:
+public:
 	enum TPositionRequestorState
 		{
 		EStopped,				// Positioning is disabled
@@ -84,7 +84,7 @@ private:
 
 
 public:
-	inline TInt State() const;
+	/*inline*/ TInt State() const;
 	/*inline*/ TBool IsRunning() const; // ToDo: Why "Undefined symbol" error when inline?
 	
 private:
