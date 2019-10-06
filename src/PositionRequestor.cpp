@@ -254,20 +254,21 @@ inline TInt CPositionRequestor::State() const
 
 void CPositionRequestor::SetState(TInt aState)
 	{
-	if (iState != aState) {
+	TInt oldState = iState;
+	iState = aState;
+	
+	if (oldState != aState) {
 		if (aState == EPositionRecieved) {
 			TRAP_IGNORE(
 					iListener->OnConnectedL(); // FixMe: Leave in onConnectedL not cached (why???)
 			);
-		} else if (iState == EPositionRecieved ||
-				iState == EStopped && aState == EPositionNotRecieved) {
+		} else if (oldState == EPositionRecieved ||
+				oldState == EStopped && aState == EPositionNotRecieved) {
 			TRAP_IGNORE(
 					iListener->OnDisconnectedL();
 			);
 		}
 	}
-		
-	iState = aState;
 	}
 
 /*inline*/ TBool CPositionRequestor::IsRunning() const
