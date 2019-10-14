@@ -14,7 +14,8 @@
 class MPositionListener {
 	public:
 		// ToDo: Is L really needed in the methods below?
-		virtual void OnPositionUpdatedL(const TPositionInfo &aPosInfo) = 0;
+		virtual void OnPositionUpdatedL() = 0;
+		virtual void OnPositionPartialUpdated() = 0;
 		virtual void OnConnectedL() = 0;
 		virtual void OnDisconnectedL() = 0;
 		virtual void OnErrorL(TInt aErrCode) = 0;

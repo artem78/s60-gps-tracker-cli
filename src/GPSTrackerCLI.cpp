@@ -15,6 +15,8 @@
 #include <e32cons.h>			// Console
 #include <f32file.h>
 #include "Logger.h"
+#include <lbspositioninfo.h>
+#include <lbssatellite.h> 
 
 #include "PositionListener.h"
 #include "PositionRequestor.h"
@@ -53,14 +55,21 @@ _LIT(KTextLon, "Longitude: ");
 _LIT(KTextAlt, "Altitude: ");
 _LIT(KTextHAcc, "Horizontal accuracy: ");
 _LIT(KTextVAcc, "Vertical accuracy: ");
-_LIT(KTextTime, "Time: ");
+//_LIT(KTextTime, "Time: ");
+_LIT(KTextPhoneTime, "Phone time: ");
 _LIT(KTextSpeed, "Speed: ");
+_LIT(KTextCourse, "Course: ");
+_LIT(KTextHeading, "Heading: ");
+_LIT(KTextSatellites, "Satellites: ");
+_LIT(KTextSatelliteTime, "GPS time: ");
+_LIT(KTextGDOP, "GDOP: ");
 _LIT(KTextPointsCount, "Saved points: ");
 _LIT(KTextTotalDistance, "Odometer: ");
 _LIT(KTextPosUpdateInterval, "Position refresh rate: ");
 
 const TChar KSpace = TChar(0x20);
 const TChar KLineBreak = TChar(0x0A);
+const TChar KForwardSlash = TChar(0x2F);
 
 _LIT(KMetresUnit, "m");
 _LIT(KKilometersUnit, "km");
@@ -69,6 +78,7 @@ _LIT(KMetresPerSecondsUnit, "m/s");
 #endif
 _LIT(KKilometersPerHourUnit, "km/h");
 _LIT(KSecondsUnit, "s");
+const TChar KDegree = TChar(0xB0);
 
 _LIT(KTextNoPosition, "[ Waiting for GPS signal... ]");
 _LIT(KTextTrackingPaused, "[ Track recording paused ]");
@@ -101,6 +111,10 @@ void CListener::ShowDataL()
 	TRealFormat longRealFmt = TRealFormat(10, 5);
 	_LIT(KUTC, "UTC");
 	
+	TPositionInfo* posInfo = iPosRequestor->LastKnownPositionInfo(); 
+	TPosition pos;
+	posInfo->GetPosition(pos);
+	
 	RBuf buff;
 	buff.CreateL(1024);
 	buff.CleanupClosePushL();
@@ -110,7 +124,7 @@ void CListener::ShowDataL()
 	TSize consoleSize = iConsole->ScreenSize();
 	if (!iPosRequestor->IsRunning())
 		buff.AppendJustify(KTextTrackingPaused, consoleSize.iWidth, ECenter, KSpace);
-	else if (iPosRequestor->State() != CPositionRequestor::EPositionRecieved)
+	else if (!iPosRequestor->IsPositionRecieved())
 		buff.AppendJustify(KTextNoPosition, consoleSize.iWidth, ECenter, KSpace);
 	else
 		buff.Append(KLineBreak);
@@ -120,24 +134,30 @@ void CListener::ShowDataL()
 	// Latitude
 	buff.AppendJustify(KTextLat, KLabelMaxWidth, ERight, KSpace);
 	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
-		buff.AppendNum(iLastKnownPosition.Latitude(), longRealFmt);
+		{
+		buff.AppendNum(pos.Latitude(), longRealFmt);
+		buff.Append(KDegree);
+		}
 	else
 		buff.Append(KTextNoValue);
 	buff.Append(KLineBreak);
 	
 	// Longitude
 	buff.AppendJustify(KTextLon, KLabelMaxWidth, ERight, KSpace);
-	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
-		buff.AppendNum(iLastKnownPosition.Longitude(), longRealFmt);
+	if (iPosRequestor->IsPositionRecieved())
+		{
+		buff.AppendNum(pos.Longitude(), longRealFmt);
+		buff.Append(KDegree);
+		}
 	else
 		buff.Append(KTextNoValue);
 	buff.Append(KLineBreak);
 	
 	// Altitude
 	buff.AppendJustify(KTextAlt, KLabelMaxWidth, ERight, KSpace);
-	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+	if (iPosRequestor->IsPositionRecieved())
 		{
-		buff.AppendNum(iLastKnownPosition.Altitude(), shortRealFmt);
+		buff.AppendNum(pos.Altitude(), shortRealFmt);
 		buff.Append(KSpace);
 		buff.Append(KMetresUnit);
 		}
@@ -147,9 +167,9 @@ void CListener::ShowDataL()
 	
 	// Horizontal accuracy
 	buff.AppendJustify(KTextHAcc, KLabelMaxWidth, ERight, KSpace);
-	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+	if (iPosRequestor->IsPositionRecieved())
 		{
-		buff.AppendNum(iLastKnownPosition.HorizontalAccuracy(), shortRealFmt);
+		buff.AppendNum(pos.HorizontalAccuracy(), shortRealFmt);
 		buff.Append(KSpace);
 		buff.Append(KMetresUnit);
 		}
@@ -159,9 +179,9 @@ void CListener::ShowDataL()
 	
 	// Vertical accuracy
 	buff.AppendJustify(KTextVAcc, KLabelMaxWidth, ERight, KSpace);
-	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+	if (iPosRequestor->IsPositionRecieved())
 		{
-		buff.AppendNum(iLastKnownPosition.VerticalAccuracy(), shortRealFmt);
+		buff.AppendNum(pos.VerticalAccuracy(), shortRealFmt);
 		buff.Append(KSpace);
 		buff.Append(KMetresUnit);
 		}
@@ -169,23 +189,9 @@ void CListener::ShowDataL()
 		buff.Append(KTextNoValue);
 	buff.Append(KLineBreak);
 	
-	// Time
-	buff.AppendJustify(KTextTime, KLabelMaxWidth, ERight, KSpace);
-	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
-		{
-		TBuf<20> timeBuff;
-		iLastKnownPosition.Time().FormatL(timeBuff, KTimeFormat);
-		buff.Append(timeBuff);
-		buff.Append(KSpace);
-		buff.Append(KUTC);
-		}
-	else
-		buff.Append(KTextNoValue);
-	buff.Append(KLineBreak);
-	
 	// Speed
 	buff.AppendJustify(KTextSpeed, KLabelMaxWidth, ERight, KSpace);
-	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+	if (iPosRequestor->IsPositionRecieved())
 		{
 		buff.AppendNum(iSpeed * 3.6, shortRealFmt);
 		buff.Append(KSpace);
@@ -198,6 +204,128 @@ void CListener::ShowDataL()
 		buff.Append(KMetresPerSecondsUnit);
 		buff.Append(TChar(0x29));
 #endif
+		}
+	else
+		buff.Append(KTextNoValue);
+	buff.Append(KLineBreak);
+	
+	// Course info
+	if (posInfo->PositionClassType() & EPositionCourseInfoClass)
+		{
+		TPositionCourseInfo* courseInfo = static_cast<TPositionCourseInfo*>(posInfo);
+		TCourse course;
+		courseInfo->GetCourse(course);
+		
+		// Speed
+		/*buff.AppendJustify(KTextSpeed, KLabelMaxWidth, ERight, KSpace);
+		if (iPosRequestor->IsPositionRecieved() && !Math::IsNaN(course.Speed()))
+			{
+			buff.AppendNum(course.Speed() * 3.6, shortRealFmt);
+			buff.Append(KSpace);
+			buff.Append(KKilometersPerHourUnit);
+#ifdef _DEBUG
+			buff.Append(KSpace);
+			buff.Append(TChar(0x28));
+			buff.AppendNum(course.Speed(), longRealFmt);
+			buff.Append(KSpace);
+			buff.Append(KMetresPerSecondsUnit);
+			buff.Append(TChar(0x29));
+#endif
+			}
+		else
+			buff.Append(KTextNoValue);
+		buff.Append(KLineBreak);*/
+		
+		// Course
+		/*// ToDo: What is the difference between course and heading?
+		buff.AppendJustify(KTextCourse, KLabelMaxWidth, ERight, KSpace);
+		if (iPosRequestor->IsPositionRecieved() && !Math::IsNaN(course.Course()))
+			{
+			buff.AppendNum(course.Course(), shortRealFmt);
+			buff.Append(KDegree);
+			}
+		else
+			buff.Append(KTextNoValue);
+		buff.Append(KLineBreak);*/
+		
+		// Heading
+		buff.AppendJustify(KTextHeading, KLabelMaxWidth, ERight, KSpace);
+		if (iPosRequestor->IsPositionRecieved() && !Math::IsNaN(course.Heading()))
+			{
+			buff.AppendNum(course.Heading(), shortRealFmt);
+			buff.Append(KDegree);
+			}
+		else
+			buff.Append(KTextNoValue);
+		buff.Append(KLineBreak);
+		
+		}
+	
+	// Sattelite info
+	if (posInfo->PositionClassType() & EPositionSatelliteInfoClass)
+		{
+		TPositionSatelliteInfo* satelliteInfo = static_cast<TPositionSatelliteInfo*>(posInfo);
+		
+		// Satellites count
+		buff.AppendJustify(KTextSatellites, KLabelMaxWidth, ERight, KSpace);
+		if (iPosRequestor->IsRunning())
+			{
+			buff.AppendNum(satelliteInfo->NumSatellitesUsed());
+			buff.Append(KSpace);
+			buff.Append(KForwardSlash);
+			buff.Append(KSpace);
+			buff.AppendNum(satelliteInfo->NumSatellitesInView());
+			}
+		else
+			buff.Append(KTextNoValue);
+		buff.Append(KLineBreak);
+		
+		// GDOP
+		buff.AppendJustify(KTextGDOP, KLabelMaxWidth, ERight, KSpace);
+		if (iPosRequestor->IsPositionRecieved())
+			{
+			TReal tmp1, tmp2;
+			User::LeaveIfError(Math::Pow(tmp1, satelliteInfo->HorizontalDoP(), 2));
+			User::LeaveIfError(Math::Pow(tmp2, satelliteInfo->VerticalDoP(), 2));
+			TReal pdop;
+			User::LeaveIfError(Math::Sqrt(pdop, tmp1 + tmp2));
+			
+			User::LeaveIfError(Math::Pow(tmp1, pdop, 2));
+			User::LeaveIfError(Math::Pow(tmp2, satelliteInfo->TimeDoP(), 2));
+			TReal gdop;
+			User::LeaveIfError(Math::Sqrt(gdop, tmp1 + tmp2));
+			
+			buff.AppendNum(gdop, shortRealFmt);
+			}
+		else
+			buff.Append(KTextNoValue);
+		buff.Append(KLineBreak);
+		
+		// Satellite time
+		buff.AppendJustify(KTextSatelliteTime, KLabelMaxWidth, ERight, KSpace);
+		//if (iPosRequestor->IsPositionRecieved())
+		if (iPosRequestor->IsRunning() && satelliteInfo->SatelliteTime().Int64() > 0)
+			{
+			TBuf<20> timeBuff;
+			satelliteInfo->SatelliteTime().FormatL(timeBuff, KTimeFormat);
+			buff.Append(timeBuff);
+			buff.Append(KSpace);
+			buff.Append(KUTC);
+			}
+		else
+			buff.Append(KTextNoValue);
+		buff.Append(KLineBreak);
+		}
+	
+	// Time
+	buff.AppendJustify(KTextPhoneTime, KLabelMaxWidth, ERight, KSpace);
+	if (iPosRequestor->IsPositionRecieved())
+		{
+		TBuf<20> timeBuff;
+		pos.Time().FormatL(timeBuff, KTimeFormat);
+		buff.Append(timeBuff);
+		buff.Append(KSpace);
+		buff.Append(KUTC);
 		}
 	else
 		buff.Append(KTextNoValue);
@@ -264,31 +392,38 @@ void CListener::OnDisconnectedL()
 	iTrackWriter->StartNewSegment();
 	}
 
-void CListener::OnPositionUpdatedL(const TPositionInfo& aPosInfo)
+void CListener::OnPositionUpdatedL()
 	{
+	TPositionInfo* posInfo = iPosRequestor->LastKnownPositionInfo();
 	TPosition pos;
-	aPosInfo.GetPosition(pos);
+	posInfo->GetPosition(pos);
+	
+	TPositionInfo* prevPosInfo = iPosRequestor->PrevLastKnownPositionInfo();
+	TPosition prevPos;
+	prevPosInfo->GetPosition(prevPos);
 	
 	// Increment counters and calculate speed
 	iTotalPointsCount++;
 	TReal32 distance = 0;
 	iSpeed = 0;
-	if (iTotalPointsCount > 1) // Skip first time when iLastKnownPosition is not set yet
+	if (iTotalPointsCount > 1) // Skip first time when iLastKnownPositionInfo is not set yet
 		{
-		pos.Distance(iLastKnownPosition, distance);
+		pos.Distance(prevPos, distance);
 		iTotalDistance += distance;
 		
-		pos.Speed(iLastKnownPosition, iSpeed);
+		pos.Speed(prevPos, iSpeed);
 		}
 	LOG(_L8("Current speed %.1f m/s"), iSpeed);
 	
-	// Save current position as last known
-	iLastKnownPosition = pos;
-	
 	// Write position to file
-	iTrackWriter->AddPoint(aPosInfo);
+	iTrackWriter->AddPoint(*posInfo);
 	
 	// Write position to the screen	
+	ShowDataL();
+	}
+
+void CListener::OnPositionPartialUpdated()
+	{
 	ShowDataL();
 	}
 

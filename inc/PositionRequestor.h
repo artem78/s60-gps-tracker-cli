@@ -86,6 +86,11 @@ public:
 public:
 	/*inline*/ TInt State() const;
 	/*inline*/ TBool IsRunning() const; // ToDo: Why "Undefined symbol" error when inline?
+	/*inline*/ TBool IsPositionRecieved() const;
+	TPositionInfo* LastKnownPositionInfo();
+	TPositionInfo* PrevLastKnownPositionInfo();
+	//void LastKnownPositionInfo(TPositionInfo &aPosInfo);
+	//void PrevLastKnownPositionInfo(TPositionInfo &aPosInfo);
 	
 private:
 	TInt /*(TODO: TPositionRequestorState ?)*/ iState; // State of the active object
@@ -97,7 +102,8 @@ protected:
 	RPositioner iPositioner;
 	
 //protected:
-	TPositionInfo iLastPosInfo;
+	TPositionInfo* iLastPosInfo;
+	TPositionInfo* iPrevLastPosInfo;
 	
 private:
 	

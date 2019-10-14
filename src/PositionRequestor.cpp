@@ -10,6 +10,7 @@
 
 #include "PositionRequestor.h"
 #include "Logger.h"
+#include <lbssatellite.h>
 
 
 // CPositionRequestor
@@ -34,7 +35,7 @@ CPositionRequestor::CPositionRequestor(MPositionListener *aListener,
 		iUpdateOptions.SetUpdateInterval(aUpdateInterval);
 		iUpdateOptions.SetUpdateTimeOut(aUpdateTimeOut);
 		iUpdateOptions.SetMaxUpdateAge(TTimeIntervalMicroSeconds(KPositionMaxUpdateAge));
-		iUpdateOptions.SetAcceptPartialUpdates(EFalse);
+		iUpdateOptions.SetAcceptPartialUpdates(ETrue);
 	}
 
 CPositionRequestor* CPositionRequestor::NewLC(MPositionListener *aPositionListener,
@@ -61,16 +62,49 @@ CPositionRequestor* CPositionRequestor::NewL(MPositionListener *aPositionListene
 void CPositionRequestor::ConstructL()
 	{
 	LOG(_L8("Position requestor created"));
-	//User::LeaveIfError(iTimer.CreateLocal()); // Initialize timer
 	
-	// 1. Create a session with the location server
 	User::LeaveIfError(iPosServer.Connect());
-	//CleanupClosePushL(iPosServer);
+	TPositionModuleId moduleId;
+	User::LeaveIfError(iPosServer.GetDefaultModuleId(moduleId));
+	
+	
+	// Create specified position info object depending on the module capabilities
+	TPositionModuleInfo moduleInfo;
+	User::LeaveIfError(iPosServer.GetModuleInfoById(moduleId, moduleInfo));
+	TUint32 moduleInfoFamily = moduleInfo.ClassesSupported(EPositionInfoFamily);
+	
+	if (moduleInfoFamily & EPositionSatelliteInfoClass)
+		{
+		LOG(_L8("Sattelite info supported"));
+		iLastPosInfo = new (ELeave) TPositionSatelliteInfo;
+		iPrevLastPosInfo = new (ELeave) TPositionSatelliteInfo;
+		}
+	else if (moduleInfoFamily & EPositionCourseInfoClass)
+		{
+		LOG(_L8("Course info supported"));
+		iLastPosInfo = new (ELeave) TPositionCourseInfo;
+		iPrevLastPosInfo = new (ELeave) TPositionCourseInfo;
+		}
+	else if (moduleInfoFamily & EPositionInfoClass)
+		{
+		LOG(_L8("Position info supported"));
+		iLastPosInfo = new (ELeave) TPositionInfo;
+		iPrevLastPosInfo = new (ELeave) TPositionInfo;
+		}
+	else
+		{
+		LOG(_L8("Positioning module do not support any suitable class!"));
+		User::Leave(KErrNotSupported);
+		}
+	
+	
+	// Preparing for start position recieving
+	//User::LeaveIfError(iTimer.CreateLocal()); // Initialize timer
 	
 	// 2. Create a subsession using the default positioning module
 	//TPositionModuleId moduleId = TPositionModuleId();
 	//moduleId.Uid(KGPSModuleID);
-	User::LeaveIfError(iPositioner.Open(iPosServer/*, moduleId*/));
+	User::LeaveIfError(iPositioner.Open(iPosServer, moduleId));
 	//CleanupClosePushL(iPositioner);
 	
 	// 3. Set update options
@@ -92,6 +126,8 @@ CPositionRequestor::~CPositionRequestor()
 	// Delete instance variables if any
 	iPositioner.Close();
 	iPosServer.Close();
+	delete iPrevLastPosInfo;
+	delete iLastPosInfo;
 	LOG(_L8("Position requestor deleted"));
 	}
 
@@ -112,7 +148,7 @@ void CPositionRequestor::StartL()
 	Cancel(); // Cancel any request, just to be sure
 	//iState = EPositionNotRecieved;
 	//iTimer.After(iStatus, aDelay); // Set for later
-	iPositioner.NotifyPositionUpdate(iLastPosInfo, iStatus);
+	iPositioner.NotifyPositionUpdate(*iLastPosInfo, iStatus);
 	SetActive(); // Tell scheduler a request is active
 	SetState(EPositionNotRecieved);
 	}
@@ -140,6 +176,17 @@ void CPositionRequestor::RunL()
             {
             LOG(_L8("Position recieved"));
 
+#ifdef __WINS__
+            // On emulator time dilution of precision is NaN.
+            // So set it to any plausible value.
+            if (iLastPosInfo->PositionClassType() & EPositionSatelliteInfoClass)
+            	{
+            	TPositionSatelliteInfo* satteliteInfo = static_cast<TPositionSatelliteInfo*>(iLastPosInfo);
+            	if (Math::IsNaN(satteliteInfo->TimeDoP()))
+            		satteliteInfo->SetTimeDoP(1.5);
+            	}
+#endif
+            
             /*if (iState != EPositionRecieved) {
 				iState = EPositionRecieved;
 				TRAP_IGNORE(
@@ -152,11 +199,13 @@ void CPositionRequestor::RunL()
             // Pre process the position information
             //PositionUpdatedL();
             TRAP_IGNORE(
-            	iListener->OnPositionUpdatedL(iLastPosInfo);
+            	iListener->OnPositionUpdatedL();
             );
             
-			iPositioner.NotifyPositionUpdate(iLastPosInfo, iStatus);
+			iPositioner.NotifyPositionUpdate(*iLastPosInfo, iStatus);
 			SetActive();
+			
+			*iPrevLastPosInfo = *iLastPosInfo;
             
             break;
             }
@@ -192,10 +241,27 @@ void CPositionRequestor::RunL()
             }*/
             
         /*// There is no last known position
-        case KErrUnknown:
+        case KErrUnknown:*/
+            
         // The fix has only partially valid information.
         // It is guaranteed to only have a valid timestamp
-        case KPositionPartialUpdate:*/
+        case KPositionPartialUpdate:
+        	{
+        	LOG(_L8("Postion partial update"));
+        	
+        	SetState(EPositionNotRecieved);
+        	
+            TRAP_IGNORE(
+            	iListener->OnPositionPartialUpdated();
+            );
+            
+			iPositioner.NotifyPositionUpdate(*iLastPosInfo, iStatus);
+			SetActive();
+			
+			//*iPrevLastPosInfo = *iLastPosInfo; // ???
+        	
+        	break;
+        	}
             
         case KErrTimedOut:
             {
@@ -209,7 +275,7 @@ void CPositionRequestor::RunL()
             }*/
             SetState(EPositionNotRecieved);
             
-			iPositioner.NotifyPositionUpdate(iLastPosInfo, iStatus);
+			iPositioner.NotifyPositionUpdate(*iLastPosInfo, iStatus);
 			SetActive();
 			
             break;
@@ -276,6 +342,33 @@ void CPositionRequestor::SetState(TInt aState)
 	return iState != EStopped;
 	}
 
+/*inline*/ TBool CPositionRequestor::IsPositionRecieved() const
+	{
+	return iState == CPositionRequestor::EPositionRecieved;
+	}
+
+TPositionInfo* CPositionRequestor::LastKnownPositionInfo()
+	{
+	// ToDo: Make read only
+	return iLastPosInfo;
+	}
+
+TPositionInfo* CPositionRequestor::PrevLastKnownPositionInfo()
+	{
+	// ToDo: Make read only
+	return iPrevLastPosInfo;
+	}
+
+/*void CPositionRequestor::LastKnownPositionInfo(TPositionInfo &aPosInfo)
+	{
+	aPosInfo = *iLastPosInfo;
+	}*/
+
+/*void CPositionRequestor::PrevLastKnownPositionInfo(TPositionInfo &aPosInfo)
+	{
+	aPosInfo = *iPrevLastPosInfo;
+	}*/
+
 
 
 // CDynamicPositionRequestor
@@ -339,7 +432,7 @@ void CDynamicPositionRequestor::RunL()
 		//case KPositionQualityLoss:
 			{
 			TPosition pos;
-			iLastPosInfo.GetPosition(pos);
+			iLastPosInfo->GetPosition(pos);
 			//Logger::WriteEmptyLine();
 			/*TBuf<20> timeBuff1;
 			pos.Time().FormatL(timeBuff1, KLogTimeFormat);

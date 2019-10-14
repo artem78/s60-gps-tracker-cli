@@ -36,10 +36,10 @@ private:
 	/*CTrackWriterBase**/ CGPXTrackWriter* iTrackWriter;
 	TUint iTotalPointsCount;
 	TReal iTotalDistance;
-	TPosition iLastKnownPosition;
 	TReal32 iSpeed;
 	
 	void ShowDataL();
+	
 public:
 	CListener(CConsoleBase* aConsole, /*CTrackWriterBase**/ CGPXTrackWriter* aTrackWriter);
 	void SetPositionRequestor(/*CPositionRequestor**/ CDynamicPositionRequestor* aPosRequestor);
@@ -47,7 +47,8 @@ public:
 		// Setter used because there is cyclical dependency with requestor class.
 	
 	// Events
-	void OnPositionUpdatedL(const TPositionInfo &aPosInfo);
+	void OnPositionUpdatedL();
+	void OnPositionPartialUpdated();
 	void OnConnectedL();
 	void OnDisconnectedL();
 	void OnErrorL(TInt aErrCode);
