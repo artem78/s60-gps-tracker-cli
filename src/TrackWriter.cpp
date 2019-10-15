@@ -58,23 +58,30 @@ CGPXTrackWriter::~CGPXTrackWriter()
 	User::LeaveIfError(iFile.Write(KGPXContentEnd));
 	}
 
-CGPXTrackWriter* CGPXTrackWriter::NewLC(RFile &aFile, TBool aWriteExtendedData)
+CGPXTrackWriter* CGPXTrackWriter::NewLC(RFile &aFile, TBool aWriteExtendedData,
+		const TDesC &aCreator)
 	{
 	CGPXTrackWriter* self = new (ELeave) CGPXTrackWriter(aFile, aWriteExtendedData);
 	CleanupStack::PushL(self);
-	self->ConstructL();
+	self->ConstructL(aCreator);
 	return self;
 	}
 
-CGPXTrackWriter* CGPXTrackWriter::NewL(RFile &aFile, TBool aWriteExtendedData)
+CGPXTrackWriter* CGPXTrackWriter::NewL(RFile &aFile, TBool aWriteExtendedData,
+		const TDesC &aCreator)
 	{
-	CGPXTrackWriter* self = CGPXTrackWriter::NewLC(aFile, aWriteExtendedData);
+	CGPXTrackWriter* self = CGPXTrackWriter::NewLC(aFile, aWriteExtendedData, aCreator);
 	CleanupStack::Pop(); // self;
 	return self;
 	}
 
-void CGPXTrackWriter::ConstructL()
+void CGPXTrackWriter::ConstructL(const TDesC &aCreator)
 	{
+	if (iCreator.MaxLength() >= aCreator.Length())
+		iCreator.Copy(aCreator); // FixMe: Do not work with non ASCII symbols
+	else
+		User::Leave(/*KErrArgument*/ KErrBadDescriptor);
+	
 	// Set general format for numbers
 	iGeneralRealFormat = TRealFormat();
 	iGeneralRealFormat.iType = KRealFormatFixed;
@@ -84,12 +91,15 @@ void CGPXTrackWriter::ConstructL()
 	iGeneralRealFormat.iWidth = KDefaultRealWidth;
 	
 	
-	_LIT8(KGPXContentBegining, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+	_LIT8(KGPXContentBegining1, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 			"<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" version=\"1.1\"\n"
-			"creator=\"\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+			"creator=\"");
+	_LIT8(KGPXContentBegining2, "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
 			"xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n"
 			"\t<trk>\n");
-	User::LeaveIfError(iFile.Write(KGPXContentBegining));
+	User::LeaveIfError(iFile.Write(KGPXContentBegining1));
+	User::LeaveIfError(iFile.Write(iCreator));
+	User::LeaveIfError(iFile.Write(KGPXContentBegining2));
 	}
 
 void CGPXTrackWriter::AddPoint(const TPositionInfo* aPosInfo)

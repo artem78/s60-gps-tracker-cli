@@ -78,12 +78,14 @@ public:
 	/**
 	 * Two-phased constructor.
 	 */
-	static CGPXTrackWriter* NewL(RFile &aFile, TBool aWriteExtendedData = EFalse);
+	static CGPXTrackWriter* NewL(RFile &aFile, TBool aWriteExtendedData = EFalse,
+			const TDesC &aCreator = KNullDesC);
 
 	/**
 	 * Two-phased constructor.
 	 */
-	static CGPXTrackWriter* NewLC(RFile &aFile, TBool aWriteExtendedData = EFalse);
+	static CGPXTrackWriter* NewLC(RFile &aFile, TBool aWriteExtendedData = EFalse,
+			const TDesC &aCreator = KNullDesC);
 	
 	void AddPoint(const TPositionInfo* aPosInfo);
 	void StartNewSegment();
@@ -98,11 +100,12 @@ private:
 	/**
 	 * EPOC default constructor for performing 2nd stage construction
 	 */
-	void ConstructL();
+	void ConstructL(const TDesC &aCreator);
 	
 	TRealFormat iGeneralRealFormat;
 	TBool iIsSegmentOpened;
 	TBool iIsWriteExtendedData;
+	TBuf8<100> iCreator;
 	
 	void OpenSegment();
 	void CloseSegment();

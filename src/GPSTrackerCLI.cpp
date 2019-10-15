@@ -34,6 +34,7 @@
 //  Constants
 
 _LIT(KProgramName, "GPS Tracker CLI");
+_LIT(KProgramVersion, "1.1.1");
 _LIT(KTextFailed, " failed, leave code = %d");
 //_LIT(KTextPressAnyKey, " [press any key]\n");
 _LIT(KTextPressAnyKeyToQuit, " [press any key to quit]\n");
@@ -520,7 +521,11 @@ LOCAL_C void MainL()
 	CleanupClosePushL(gpxFile);
 	
 	//CGPXTrackWriter* trackWriter = new (ELeave) CGPXTrackWriter(gpxFile);
-	CGPXTrackWriter* trackWriter = CGPXTrackWriter::NewL(gpxFile, ETrue);
+	TBuf<100> programFullName;
+	programFullName.Append(KProgramName);
+	programFullName.Append(KSpace);
+	programFullName.Append(KProgramVersion);
+	CGPXTrackWriter* trackWriter = CGPXTrackWriter::NewL(gpxFile, ETrue, programFullName);
 	CleanupStack::PushL(trackWriter);
 	
 	CListener* listener = new (ELeave) CListener(console, trackWriter);
