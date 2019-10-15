@@ -403,7 +403,7 @@ void CListener::OnPositionUpdatedL()
 	LOG(_L8("Current speed %.1f m/s"), iSpeed);
 	
 	// Write position to file
-	iTrackWriter->AddPoint(*posInfo);
+	iTrackWriter->AddPoint(posInfo);
 	
 	// Write position to the screen	
 	ShowDataL();
@@ -520,7 +520,7 @@ LOCAL_C void MainL()
 	CleanupClosePushL(gpxFile);
 	
 	//CGPXTrackWriter* trackWriter = new (ELeave) CGPXTrackWriter(gpxFile);
-	CGPXTrackWriter* trackWriter = CGPXTrackWriter::NewL(gpxFile);
+	CGPXTrackWriter* trackWriter = CGPXTrackWriter::NewL(gpxFile, ETrue);
 	CleanupStack::PushL(trackWriter);
 	
 	CListener* listener = new (ELeave) CListener(console, trackWriter);
