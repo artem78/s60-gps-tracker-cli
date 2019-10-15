@@ -16,7 +16,7 @@
 #include <f32file.h>
 #include "Logger.h"
 #include <lbspositioninfo.h>
-#include <lbssatellite.h> 
+#include "LBSSatelliteExtended.h"
 
 #include "PositionListener.h"
 #include "PositionRequestor.h"
@@ -264,7 +264,7 @@ void CListener::ShowDataL()
 	// Sattelite info
 	if (posInfo->PositionClassType() & EPositionSatelliteInfoClass)
 		{
-		TPositionSatelliteInfo* satelliteInfo = static_cast<TPositionSatelliteInfo*>(posInfo);
+		TPositionSatelliteInfoExtended* satelliteInfo = static_cast<TPositionSatelliteInfoExtended*>(posInfo);
 		
 		// Satellites count
 		buff.AppendJustify(KTextSatellites, KLabelMaxWidth, ERight, KSpace);
@@ -283,20 +283,7 @@ void CListener::ShowDataL()
 		// GDOP
 		buff.AppendJustify(KTextGDOP, KLabelMaxWidth, ERight, KSpace);
 		if (iPosRequestor->IsPositionRecieved())
-			{
-			TReal tmp1, tmp2;
-			User::LeaveIfError(Math::Pow(tmp1, satelliteInfo->HorizontalDoP(), 2));
-			User::LeaveIfError(Math::Pow(tmp2, satelliteInfo->VerticalDoP(), 2));
-			TReal pdop;
-			User::LeaveIfError(Math::Sqrt(pdop, tmp1 + tmp2));
-			
-			User::LeaveIfError(Math::Pow(tmp1, pdop, 2));
-			User::LeaveIfError(Math::Pow(tmp2, satelliteInfo->TimeDoP(), 2));
-			TReal gdop;
-			User::LeaveIfError(Math::Sqrt(gdop, tmp1 + tmp2));
-			
-			buff.AppendNum(gdop, shortRealFmt);
-			}
+			buff.AppendNum(satelliteInfo->GeometricDoP(), shortRealFmt);
 		else
 			buff.Append(KTextNoValue);
 		buff.Append(KLineBreak);
