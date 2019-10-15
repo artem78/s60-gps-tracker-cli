@@ -34,7 +34,7 @@
 //  Constants
 
 _LIT(KProgramName, "GPS Tracker CLI");
-_LIT(KProgramVersion, "1.1.1");
+_LIT(KProgramVersion, "1.2.0");
 _LIT(KTextFailed, " failed, leave code = %d");
 //_LIT(KTextPressAnyKey, " [press any key]\n");
 _LIT(KTextPressAnyKeyToQuit, " [press any key to quit]\n");
