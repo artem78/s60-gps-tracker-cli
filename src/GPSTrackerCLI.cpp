@@ -57,7 +57,17 @@ CGPSTrackerCLI::~CGPSTrackerCLI()
 	delete iPosRequestor;
 	delete iKeyboardActive;
 	delete iTrackWriter;
+	
+	// Remove gpx file without points
+	TFileName gpxFileName;
+	TInt res = iTrackFile.FullName(gpxFileName);
 	iTrackFile.Close();
+	if (res == KErrNone)
+		{
+		if (iTotalPointsCount == 0)
+			iFs.Delete(gpxFileName);
+		}
+	
 #if LOGGING_ENABLED
 	iLogFile.Close();
 #endif
