@@ -174,19 +174,28 @@ void CGPXTrackWriter::AddPoint(const TPositionInfo* aPosInfo)
 			buff.Append(_L("</sat>\n"));
 			
 			// HDOP
-			buff.Append(_L("\t\t\t\t<hdop>"));
-			buff.AppendNum(satelliteInfo->HorizontalDoP(), iGeneralRealFormat);
-			buff.Append(_L("</hdop>\n"));
+			if (!Math::IsNaN(satelliteInfo->HorizontalDoP()))
+				{
+				buff.Append(_L("\t\t\t\t<hdop>"));
+				buff.AppendNum(satelliteInfo->HorizontalDoP(), iGeneralRealFormat);
+				buff.Append(_L("</hdop>\n"));
+				}
 			
 			// VDOP
-			buff.Append(_L("\t\t\t\t<vdop>"));
-			buff.AppendNum(satelliteInfo->VerticalDoP(), iGeneralRealFormat);
-			buff.Append(_L("</vdop>\n"));
+			if (!Math::IsNaN(satelliteInfo->VerticalDoP()))
+				{
+				buff.Append(_L("\t\t\t\t<vdop>"));
+				buff.AppendNum(satelliteInfo->VerticalDoP(), iGeneralRealFormat);
+				buff.Append(_L("</vdop>\n"));
+				}
 			
 			// PDOP
-			buff.Append(_L("\t\t\t\t<pdop>"));
-			buff.AppendNum(satelliteInfo->PositionDoP(), iGeneralRealFormat);
-			buff.Append(_L("</pdop>\n"));
+			if (!Math::IsNaN(satelliteInfo->PositionDoP()))
+				{
+				buff.Append(_L("\t\t\t\t<pdop>"));
+				buff.AppendNum(satelliteInfo->PositionDoP(), iGeneralRealFormat);
+				buff.Append(_L("</pdop>\n"));
+				}
 			}
 		}
 	
