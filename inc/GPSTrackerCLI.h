@@ -39,6 +39,7 @@ private:
 	TUint iTotalPointsCount;
 	TReal iTotalDistance;
 	TReal32 iSpeed;
+	TBool iIsAfterConnectionRestored;
 	
 	CGPSTrackerCLI(CConsoleBase* aConsole);
 	void ConstructL();

@@ -473,10 +473,13 @@ void CGPSTrackerCLI::ShowDataL()
 
 void CGPSTrackerCLI::OnConnectedL()
 	{
+	LOG(_L8("Connected"));
+	iIsAfterConnectionRestored = ETrue;
 	}
 
 void CGPSTrackerCLI::OnDisconnectedL()
 	{
+	LOG(_L8("Disconnected"));
 	ShowDataL();
 	
 	iTrackWriter->StartNewSegment();
@@ -496,13 +499,16 @@ void CGPSTrackerCLI::OnPositionUpdatedL()
 	iTotalPointsCount++;
 	TReal32 distance = 0;
 	iSpeed = 0;
-	if (iTotalPointsCount > 1) // Skip first time when iLastKnownPositionInfo is not set yet
+	LOG(_L8("iIsAfterConnectionRestored=%d"), iIsAfterConnectionRestored);
+	if (!iIsAfterConnectionRestored) // Skip distance increase when connection lost
 		{
 		pos.Distance(prevPos, distance);
 		iTotalDistance += distance;
-		
-		pos.Speed(prevPos, iSpeed);
 		}
+	LOG(_L8("iTotalDistance=%f"), iTotalDistance);
+	
+	if (iTotalPointsCount > 1) // Skip first time when iLastKnownPositionInfo is not set yet
+		pos.Speed(prevPos, iSpeed);
 	LOG(_L8("Current speed %.1f m/s"), iSpeed);
 	
 	// Write position to file
@@ -510,6 +516,8 @@ void CGPSTrackerCLI::OnPositionUpdatedL()
 	
 	// Write position to the screen	
 	ShowDataL();
+	
+	iIsAfterConnectionRestored = EFalse;
 	}
 
 void CGPSTrackerCLI::OnPositionPartialUpdated()
