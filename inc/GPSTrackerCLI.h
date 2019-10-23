@@ -38,7 +38,6 @@ private:
 	CKeyboardActive* iKeyboardActive;
 	TUint iTotalPointsCount;
 	TReal iTotalDistance;
-	TReal32 iSpeed;
 	TBool iIsAfterConnectionRestored;
 	
 	CGPSTrackerCLI(CConsoleBase* aConsole);

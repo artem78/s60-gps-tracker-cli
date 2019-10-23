@@ -303,26 +303,6 @@ void CGPSTrackerCLI::ShowDataL()
 		buff.Append(KTextNoValue);
 	buff.Append(KLineBreak);
 	
-	// Speed
-	buff.AppendJustify(KTextSpeed, KLabelMaxWidth, ERight, KSpace);
-	if (iPosRequestor->IsPositionRecieved())
-		{
-		buff.AppendNum(iSpeed * 3.6, shortRealFmt);
-		buff.Append(KSpace);
-		buff.Append(KKilometersPerHourUnit);
-#ifdef _DEBUG
-		buff.Append(KSpace);
-		buff.Append(TChar(0x28));
-		buff.AppendNum(iSpeed, /*shortRealFmt*/ longRealFmt);
-		buff.Append(KSpace);
-		buff.Append(KMetresPerSecondsUnit);
-		buff.Append(TChar(0x29));
-#endif
-		}
-	else
-		buff.Append(KTextNoValue);
-	buff.Append(KLineBreak);
-	
 	// Course info
 	if (posInfo->PositionClassType() & EPositionCourseInfoClass)
 		{
@@ -331,7 +311,7 @@ void CGPSTrackerCLI::ShowDataL()
 		courseInfo->GetCourse(course);
 		
 		// Speed
-		/*buff.AppendJustify(KTextSpeed, KLabelMaxWidth, ERight, KSpace);
+		buff.AppendJustify(KTextSpeed, KLabelMaxWidth, ERight, KSpace);
 		if (iPosRequestor->IsPositionRecieved() && !Math::IsNaN(course.Speed()))
 			{
 			buff.AppendNum(course.Speed() * 3.6, shortRealFmt);
@@ -348,7 +328,7 @@ void CGPSTrackerCLI::ShowDataL()
 			}
 		else
 			buff.Append(KTextNoValue);
-		buff.Append(KLineBreak);*/
+		buff.Append(KLineBreak);
 		
 		// Course
 		/*// ToDo: What is the difference between course and heading?
@@ -498,7 +478,6 @@ void CGPSTrackerCLI::OnPositionUpdatedL()
 	// Increment counters and calculate speed
 	iTotalPointsCount++;
 	TReal32 distance = 0;
-	iSpeed = 0;
 	LOG(_L8("iIsAfterConnectionRestored=%d"), iIsAfterConnectionRestored);
 	if (!iIsAfterConnectionRestored) // Skip distance increase when connection lost
 		{
@@ -506,10 +485,6 @@ void CGPSTrackerCLI::OnPositionUpdatedL()
 		iTotalDistance += distance;
 		}
 	LOG(_L8("iTotalDistance=%f"), iTotalDistance);
-	
-	if (iTotalPointsCount > 1) // Skip first time when iLastKnownPositionInfo is not set yet
-		pos.Speed(prevPos, iSpeed);
-	LOG(_L8("Current speed %.1f m/s"), iSpeed);
 	
 	// Write position to file
 	iTrackWriter->AddPoint(posInfo);
