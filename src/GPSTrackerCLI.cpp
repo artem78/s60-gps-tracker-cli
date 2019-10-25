@@ -418,9 +418,18 @@ void CGPSTrackerCLI::ShowDataL()
 	
 	// Total distance
 	buff.AppendJustify(KTextTotalDistance, KLabelMaxWidth, ERight, KSpace);
-	buff.AppendNum(iTotalDistance / 1000.0, shortRealFmt);
-	buff.Append(KSpace);
-	buff.Append(KKilometersUnit);
+	if (iTotalDistance < 1000.0) // For <1km show distance in tens of meters
+		{
+		buff.AppendNum((TInt) /*(*/ iTotalDistance /*+ 5)*/ / 10 * 10);
+		buff.Append(KSpace);
+		buff.Append(KMetresUnit);
+		}
+	else // Show distance in kilometers
+		{
+		buff.AppendNum(iTotalDistance / 1000.0, shortRealFmt);
+		buff.Append(KSpace);
+		buff.Append(KKilometersUnit);
+		}
 	buff.Append(KLineBreak);
 	
 	// Update interval
