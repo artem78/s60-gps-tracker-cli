@@ -21,7 +21,8 @@
 :"artem78 <megabyte1024@ya.ru>"
 
 ;Platform version
-[0x102032BE], 0, 0, 0, {"S60 3rd Edition FP1 (Symbian 9.2)"}
+[0x101F7961], 0, 0, 0, {"S60 3rd Edition devices"}
+[0x1028315F], 0, 0, 0, {"S60 5th Edition devices"}
 
 "$(EPOCROOT)Epoc32\release\$(PLATFORM)\$(TARGET)\GPSTrackerCLI.exe"		  -"!:\sys\bin\GPSTrackerCLI.exe"
 "$(EPOCROOT)Epoc32\data\z\private\10003a3f\apps\GPSTrackerCLI_reg.rsc"   -"!:\private\10003a3f\import\apps\GPSTrackerCLI_reg.rsc"
