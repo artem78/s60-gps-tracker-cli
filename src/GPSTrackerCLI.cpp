@@ -33,7 +33,7 @@
 //  Constants
 
 _LIT(KProgramName, "GPS Tracker CLI");
-_LIT(KProgramVersion, "1.2.0");
+_LIT(KProgramVersion, "1.2.1");
 _LIT(KTracksDir, "\\data\\GPSTracker\\tracks\\"); // TODO: Make this path relative
 _LIT(KLogsDir, "\\data\\GPSTracker\\logs\\"); // TODO: Make this path relative
 _LIT(KTimeFormatForFileName, "%F%Y%M%D_%H%T%S");
