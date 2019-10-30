@@ -34,9 +34,8 @@
 
 _LIT(KProgramName, "GPS Tracker CLI");
 _LIT(KProgramVersion, "1.2.0");
-_LIT(KProgramDataDir, "c:\\data\\GPSTracker\\"); // ToDo: Use drive wnere program is installed
-_LIT(KTracksDir, "c:\\data\\GPSTracker\\tracks\\"); // TODO: Make this path relative
-_LIT(KLogsDir, "c:\\data\\GPSTracker\\logs\\"); // TODO: Make this path relative
+_LIT(KTracksDir, "\\data\\GPSTracker\\tracks\\"); // TODO: Make this path relative
+_LIT(KLogsDir, "\\data\\GPSTracker\\logs\\"); // TODO: Make this path relative
 _LIT(KTimeFormatForFileName, "%F%Y%M%D_%H%T%S");
 const TChar KSpace = TChar(0x20);
 
@@ -92,7 +91,10 @@ CGPSTrackerCLI* CGPSTrackerCLI::NewL(CConsoleBase* aConsole)
 void CGPSTrackerCLI::ConstructL()
 	{
 	User::LeaveIfError(iFs.Connect());
-	//User::LeaveIfError(iFs.SetSessionPath(KProgramDataDir));
+	TFileName programDataDir;
+	/*Get*/ProgramDataDir(programDataDir);
+	User::LeaveIfError(MakeDir(programDataDir));
+	User::LeaveIfError(iFs.SetSessionPath(programDataDir));
 #if LOGGING_ENABLED
 	InitializeLoggingL();
 #endif
@@ -458,6 +460,25 @@ void CGPSTrackerCLI::ShowDataL()
 	iConsole->Write(buff);
 	
 	CleanupStack::PopAndDestroy(&buff);
+	}
+
+void CGPSTrackerCLI::/*Get*/ProgramDataDir(TDes &aDir)
+	{
+	_LIT(KProgramDataDirWithoutDrive, "\\data\\GPSTracker\\");
+	
+	aDir.Zero();
+#ifdef __WINS__
+	_LIT(KDriveC, "c:");
+	aDir.Append(KDriveC);
+#else
+	// Get drive from current process (path to exe)
+	RProcess proc;
+	TFileName procPath = proc.FileName();
+	TParse parser;
+	parser.Set(procPath, NULL, NULL);
+	aDir.Append(parser.Drive());
+#endif;
+	aDir.Append(KProgramDataDirWithoutDrive);
 	}
 
 void CGPSTrackerCLI::OnConnectedL()

@@ -60,6 +60,7 @@ private:
 	RFile iTrackFile;
 	void InitializeTrackL();
 	void ShowDataL();
+	void /*Get*/ProgramDataDir(TDes &aDir);
 	
 public:
 	~CGPSTrackerCLI();
