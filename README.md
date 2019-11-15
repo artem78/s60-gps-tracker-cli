@@ -12,6 +12,9 @@ Writes your way to file. Works on Nokia phones with S60 3rd and 5th editions.
 ## Screenshots
 ![Track is writing](screenshot.png)
 
+## Track samples
+* [https://www.openstreetmap.org/user/artem78/traces/3149367](https://www.openstreetmap.org/user/artem78/traces/3149367)
+
 ## Compatibility
 S60 based phone with Symbian 9.1-9.4 and with internal GPS-reciever.
 

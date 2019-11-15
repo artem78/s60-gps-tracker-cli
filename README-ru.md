@@ -10,6 +10,9 @@
 ## Снимки экрана
 ![Экран программы во время работы](screenshot.png)
 
+## Примеры треков
+* [https://www.openstreetmap.org/user/artem78/traces/3149367](https://www.openstreetmap.org/user/artem78/traces/3149367)
+
 ## Системные требования
 Телефон с ОS Symbian 9.1-9.4 и встроенным GPS-приёмником.
 
