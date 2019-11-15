@@ -10,7 +10,7 @@ Writes your way to file. Works on Nokia phones with S60 3rd and 5th editions.
 * Pause tracking
 
 ## Screenshots
-![Track is writing](screenshot.png)
+<kbd>![Track is writing](screenshot.png)</kbd>
 
 ## Track samples
 * [https://www.openstreetmap.org/user/artem78/traces/3149367](https://www.openstreetmap.org/user/artem78/traces/3149367)

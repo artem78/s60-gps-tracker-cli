@@ -8,7 +8,7 @@
 * Можно поставить запись на паузу
 
 ## Снимки экрана
-![Экран программы во время работы](screenshot.png)
+<kbd>![Экран программы во время работы](screenshot.png)</kbd>
 
 ## Примеры треков
 * [https://www.openstreetmap.org/user/artem78/traces/3149367](https://www.openstreetmap.org/user/artem78/traces/3149367)
