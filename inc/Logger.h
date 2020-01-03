@@ -3,6 +3,9 @@
  *
  *  Created on: 01.09.2019
  *      Author: user
+ *      Description: Simple module for writing log to file. Do not call class methods
+ *      directly, use macroses instead. Before using it`s need to set output file by
+ *      LOG_CONFIGURE macros.
  */
 
 #ifndef LOGGER_H_
@@ -30,7 +33,7 @@
 
 class Logger;
 
-// ToDo: Write to log additinal info: __FILE__, __LINE__, module name, etc...
+// ToDo: Write to log additinal info: __FILE__, __LINE__, etc...
 // ToDo: Add levels (debug, error, info, warning, etc...)
 
 #if LOGGING_ENABLED
@@ -45,13 +48,13 @@ class Logger;
 #endif
 
 class Logger
-// ToDo: Make class private (use macroses only)
+// ToDo: Allow to use methods only through macroses, but not directly
 	{
 public:
 	static void Configure(const RFile &aFile);
 	//static void Configure(const TDesC aFileName);
 	static void Write(const TDesC8 &aModule, const TDesC8 &aDes);
-	static void WriteFormat(const TDesC8 &aModule, /*const TDesC8 &aFmt*/ TRefByValue<const TDesC8> aFmt, ...);
+	static void WriteFormat(const TDesC8 &aModule, TRefByValue<const TDesC8> aFmt, ...);
 	//static void WriteEmptyLine();
 	
 private:
