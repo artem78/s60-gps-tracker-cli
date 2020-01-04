@@ -5,7 +5,7 @@
  *      Author: user
  *      Description: Simple module for writing log to file. Do not call class methods
  *      directly, use macroses instead. Before using it`s need to set output file by
- *      LOG_CONFIGURE macros.
+ *      LOG_CONFIGURE macros. Log writes in debug builds only.
  */
 
 #ifndef LOGGER_H_
@@ -31,8 +31,6 @@
 #endif
 
 
-class Logger;
-
 // ToDo: Write to log additinal info: __FILE__, __LINE__, etc...
 // ToDo: Add levels (debug, error, info, warning, etc...)
 
@@ -42,13 +40,9 @@ class Logger;
 //#define LOG(aMsg, ...) Logger::WriteFormat(aMsg, ## __VA_ARGS__);
 #define LOG(aMsg, anArgs...) Logger::WriteFormat(_L8(__PRETTY_FUNCTION__), aMsg, ##anArgs);
 // https://ru.stackoverflow.com/questions/1026888/%d0%a1%d1%83%d1%89%d0%b5%d1%81%d1%82%d0%b2%d1%83%d0%b5%d1%82-%d0%bb%d0%b8-%d0%b2-c-%d0%bc%d0%b0%d0%ba%d1%80%d0%be%d1%81-%d1%81-%d0%b8%d0%bc%d0%b5%d0%bd%d0%b5%d0%bc-%d0%ba%d0%bb%d0%b0%d1%81%d1%81%d0%b0?noredirect=1#comment1747251_1026888
-#else
-#define LOG_CONFIGURE(aFile)
-#define LOG(aMsg, anArgs...)
-#endif
+
 
 class Logger
-// ToDo: Allow to use methods only through macroses, but not directly
 	{
 public:
 	static void Configure(const RFile &aFile);
@@ -63,5 +57,10 @@ private:
 	static RFile iFile;
 	};
 
+
+#else
+#define LOG_CONFIGURE(aFile)
+#define LOG(aMsg, anArgs...)
+#endif
 
 #endif /* LOGGER_H_ */

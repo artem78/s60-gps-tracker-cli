@@ -7,6 +7,8 @@
 
 #include "Logger.h"
 
+#if LOGGING_ENABLED
+
 _LIT8(KLineBreak, "\r\n");
 _LIT8(KTab, "\t");
 
@@ -84,3 +86,5 @@ void Logger::WriteFormat(const TDesC8 &aModule, TRefByValue<const TDesC8> aFmt, 
 //	{
 //	iFile.Write(KLineBreak);
 //	}
+
+#endif
