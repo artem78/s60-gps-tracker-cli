@@ -12,7 +12,6 @@
 #define KEYBOARDACTIVE_H
 
 #include <e32base.h>	// For CActive, link against: euser.lib
-//#include <e32std.h>		// For RTimer, link against: euser.lib
 #include <e32cons.h>
 #include "KeyboardListener.h" 
 
@@ -43,28 +42,13 @@ private:
 private:
 	// From CActive
 	// Handle completion
-	void RunL(); // ToDo: Is L really needed?
+	void RunL();
 
 	// How to cancel me
 	void DoCancel();
 
-	// Override to handle leaves from RunL(). Default implementation causes
-	// the active scheduler to panic.
-	//TInt RunError(TInt aError);
-
-//private:
-	/*enum TKeyboardActiveState
-		{
-		EUninitialized, // Uninitialized
-		EInitialized, // Initalized
-		EError
-		// Error condition
-		};*/
-
+	// Custom properties and methods
 private:
-	//TInt iState; // State of the active object
-	//RTimer iTimer; // Provides async timing service
-	
 	CConsoleBase* iConsole;
 	MKeyboardListener* iListener;
 
