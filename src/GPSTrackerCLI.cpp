@@ -101,7 +101,7 @@ void CGPSTrackerCLI::ConstructL()
 	InitializeTrackL();
 	
 	iKeyboardActive = CKeyboardActive::NewL(iConsole, this);
-	iKeyboardActive->StartL();
+	iKeyboardActive->Start();
 	
 	iPosRequestor = CDynamicPositionRequestor::NewL(this);
 	iPosRequestor->StartL();

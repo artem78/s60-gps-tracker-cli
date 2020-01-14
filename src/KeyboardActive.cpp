@@ -47,7 +47,7 @@ void CKeyboardActive::DoCancel()
 	iConsole->ReadCancel();
 	}
 
-void CKeyboardActive::StartL()
+void CKeyboardActive::Start()
 	{
 	Cancel(); // Cancel any request, just to be sure
 	iConsole->Read(iStatus);

@@ -30,7 +30,7 @@ public:
 public:
 	// New functions
 	// Function for making the initial request
-	void StartL();
+	void Start();
 
 private:
 	// C++ constructor
