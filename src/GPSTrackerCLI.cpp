@@ -54,7 +54,7 @@ CGPSTrackerCLI::CGPSTrackerCLI(CConsoleBase* aConsole) :
 CGPSTrackerCLI::~CGPSTrackerCLI()
 	{
 	delete iPosRequestor;
-	delete iKeyboardActive;
+	delete iKeyCatcher;
 	delete iTrackWriter;
 	
 	// Remove gpx file without points
@@ -100,8 +100,8 @@ void CGPSTrackerCLI::ConstructL()
 #endif
 	InitializeTrackL();
 	
-	iKeyboardActive = CKeyboardActive::NewL(iConsole, this);
-	iKeyboardActive->Start();
+	iKeyCatcher = CKeyCatcher::NewL(iConsole, this);
+	iKeyCatcher->Start();
 	
 	iPosRequestor = CDynamicPositionRequestor::NewL(this);
 	iPosRequestor->StartL();

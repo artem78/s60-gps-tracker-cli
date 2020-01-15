@@ -4,59 +4,59 @@
  Author	  : artem78
  Version	 : 1.0
  Copyright   : 
- Description : CKeyboardActive implementation
+ Description : CKeyCatcher implementation
  ============================================================================
  */
 
 #include "KeyboardActive.h"
 
-CKeyboardActive::CKeyboardActive(CConsoleBase* aConsole, MKeyboardListener* aListener) :
+CKeyCatcher::CKeyCatcher(CConsoleBase* aConsole, MKeyCatcherObserver* aObserver) :
 	CActive(EPriorityUserInput),
 	iConsole(aConsole),
-	iListener(aListener)
+	iObserver(aObserver)
 	{
 	}
 
-CKeyboardActive* CKeyboardActive::NewLC(CConsoleBase* aConsole, MKeyboardListener* aListener)
+CKeyCatcher* CKeyCatcher::NewLC(CConsoleBase* aConsole, MKeyCatcherObserver* aObserver)
 	{
-	CKeyboardActive* self = new (ELeave) CKeyboardActive(aConsole, aListener);
+	CKeyCatcher* self = new (ELeave) CKeyCatcher(aConsole, aObserver);
 	CleanupStack::PushL(self);
 	self->ConstructL();
 	return self;
 	}
 
-CKeyboardActive* CKeyboardActive::NewL(CConsoleBase* aConsole, MKeyboardListener* aListener)
+CKeyCatcher* CKeyCatcher::NewL(CConsoleBase* aConsole, MKeyCatcherObserver* aObserver)
 	{
-	CKeyboardActive* self = CKeyboardActive::NewLC(aConsole, aListener);
+	CKeyCatcher* self = CKeyCatcher::NewLC(aConsole, aObserver);
 	CleanupStack::Pop(); // self;
 	return self;
 	}
 
-void CKeyboardActive::ConstructL()
+void CKeyCatcher::ConstructL()
 	{
 	CActiveScheduler::Add(this); // Add to scheduler
 	}
 
-CKeyboardActive::~CKeyboardActive()
+CKeyCatcher::~CKeyCatcher()
 	{
 	Cancel(); // Cancel any request, if outstanding
 	}
 
-void CKeyboardActive::DoCancel()
+void CKeyCatcher::DoCancel()
 	{
 	iConsole->ReadCancel();
 	}
 
-void CKeyboardActive::Start()
+void CKeyCatcher::Start()
 	{
 	Cancel(); // Cancel any request, just to be sure
 	iConsole->Read(iStatus);
 	SetActive(); // Tell scheduler a request is active
 	}
 
-void CKeyboardActive::RunL()
+void CKeyCatcher::RunL()
 	{
-	iListener->OnKeyPressed(iConsole->KeyCode());
+	iObserver->OnKeyPressed(iConsole->KeyCode());
 	
 	iConsole->Read(iStatus);
 	SetActive(); // Tell scheduler a request is active

@@ -16,8 +16,8 @@
 #include <e32keys.h>
 
 
-// Observer for recieving events from CKeyboardActive class.
-class MKeyboardListener
+// Observer for recieving events from CKeyCatcher class.
+class MKeyCatcherObserver
 	{
 public:
 	virtual void OnKeyPressed(TKeyCode aKeyCode) = 0;
@@ -26,17 +26,17 @@ public:
 
 // Makes notifications on key presses in console. Observer class must
 // implement OnKeyPressed method to recieve code of pressed key.
-class CKeyboardActive : public CActive
+class CKeyCatcher : public CActive
 	{
 public:
 	// Cancel and destroy
-	~CKeyboardActive();
+	~CKeyCatcher();
 
 	// Two-phased constructor.
-	static CKeyboardActive* NewL(CConsoleBase* aConsole, MKeyboardListener* aListener);
+	static CKeyCatcher* NewL(CConsoleBase* aConsole, MKeyCatcherObserver* aObserver);
 
 	// Two-phased constructor.
-	static CKeyboardActive* NewLC(CConsoleBase* aConsole, MKeyboardListener* aListener);
+	static CKeyCatcher* NewLC(CConsoleBase* aConsole, MKeyCatcherObserver* aObserver);
 
 public:
 	// New functions
@@ -45,7 +45,7 @@ public:
 
 private:
 	// C++ constructor
-	CKeyboardActive(CConsoleBase* aConsole, MKeyboardListener* aListener);
+	CKeyCatcher(CConsoleBase* aConsole, MKeyCatcherObserver* aObserver);
 
 	// Second-phase constructor
 	void ConstructL();
@@ -61,7 +61,7 @@ private:
 	// Custom properties and methods
 private:
 	CConsoleBase* iConsole;
-	MKeyboardListener* iListener;
+	MKeyCatcherObserver* iObserver;
 
 	};
 

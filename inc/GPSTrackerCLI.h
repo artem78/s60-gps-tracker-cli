@@ -27,14 +27,14 @@ _LIT(KTimeFormat, "%H:%T:%S");
 
 // Classes
 
-class CGPSTrackerCLI: public CBase, public MPositionListener, public MKeyboardListener
+class CGPSTrackerCLI: public CBase, public MPositionListener, public MKeyCatcherObserver
 	{
 private:
 	RFs iFs;
 	CConsoleBase* iConsole;
 	CDynamicPositionRequestor* iPosRequestor;
 	CGPXTrackWriter* iTrackWriter;
-	CKeyboardActive* iKeyboardActive;
+	CKeyCatcher* iKeyCatcher;
 	TUint iTotalPointsCount;
 	TReal iTotalDistance;
 	TBool iIsAfterConnectionRestored;
