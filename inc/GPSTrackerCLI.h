@@ -16,7 +16,6 @@
 #include <e32cons.h>
 
 #include "PositionListener.h"
-#include "KeyboardListener.h"
 #include "PositionRequestor.h"
 #include "TrackWriter.h"
 #include "KeyboardActive.h"

@@ -4,7 +4,7 @@
  Author	  : artem78
  Version	 : 1.0
  Copyright   : 
- Description : CKeyboardActive declaration
+ Description : Receiving keys pressed in console.
  ============================================================================
  */
 
@@ -13,8 +13,19 @@
 
 #include <e32base.h>	// For CActive, link against: euser.lib
 #include <e32cons.h>
-#include "KeyboardListener.h" 
+#include <e32keys.h>
 
+
+// Observer for recieving events from CKeyboardActive class.
+class MKeyboardListener
+	{
+public:
+	virtual void OnKeyPressed(TKeyCode aKeyCode) = 0;
+	};
+
+
+// Makes notifications on key presses in console. Observer class must
+// implement OnKeyPressed method to recieve code of pressed key.
 class CKeyboardActive : public CActive
 	{
 public:
@@ -53,5 +64,6 @@ private:
 	MKeyboardListener* iListener;
 
 	};
+
 
 #endif // KEYBOARDACTIVE_H
