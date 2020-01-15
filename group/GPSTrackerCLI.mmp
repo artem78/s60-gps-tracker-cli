@@ -25,7 +25,7 @@ DEBUGGABLE_UDEBONLY
 CAPABILITY Location
 
 SOURCEPATH ..\src
-SOURCE KeyboardActive.cpp TrackWriter.cpp Logger.cpp
+SOURCE KeyCatcher.cpp TrackWriter.cpp Logger.cpp
 SOURCEPATH ..\data
 START RESOURCE GPSTrackerCLI.rss
 	TARGETPATH \resource\apps

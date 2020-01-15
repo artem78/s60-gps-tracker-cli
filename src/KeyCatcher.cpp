@@ -1,6 +1,6 @@
 /*
  ============================================================================
- Name		: KeyboardActive.cpp
+ Name		: KeyCatcher.cpp
  Author	  : artem78
  Version	 : 1.0
  Copyright   : 
@@ -8,7 +8,7 @@
  ============================================================================
  */
 
-#include "KeyboardActive.h"
+#include "KeyCatcher.h"
 
 CKeyCatcher::CKeyCatcher(CConsoleBase* aConsole, MKeyCatcherObserver* aObserver) :
 	CActive(EPriorityUserInput),

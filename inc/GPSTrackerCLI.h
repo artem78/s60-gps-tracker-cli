@@ -18,7 +18,7 @@
 #include "PositionListener.h"
 #include "PositionRequestor.h"
 #include "TrackWriter.h"
-#include "KeyboardActive.h"
+#include "KeyCatcher.h"
 
 // Constants
 

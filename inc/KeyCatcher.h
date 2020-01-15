@@ -1,6 +1,6 @@
 /*
  ============================================================================
- Name		: KeyboardActive.h
+ Name		: KeyCatcher.h
  Author	  : artem78
  Version	 : 1.0
  Copyright   : 
@@ -8,8 +8,8 @@
  ============================================================================
  */
 
-#ifndef KEYBOARDACTIVE_H
-#define KEYBOARDACTIVE_H
+#ifndef KEYCATCHER_H
+#define KEYCATCHER_H
 
 #include <e32base.h>	// For CActive, link against: euser.lib
 #include <e32cons.h>
@@ -66,4 +66,4 @@ private:
 	};
 
 
-#endif // KEYBOARDACTIVE_H
+#endif // KEYCATCHER_H
