@@ -20,7 +20,7 @@
 // CLASS DECLARATION
 
 /**
- *  CTrackWriterBase
+ *  Base class for track writers.
  * 
  */
 class CTrackWriterBase : public CBase
@@ -30,41 +30,19 @@ public:
 
 	CTrackWriterBase(RFile &aFile);
 	
-	/**
-	 * Destructor.
-	 */
-	~CTrackWriterBase();
-
-	/**
-	 * Two-phased constructor.
-	 */
-	//static CTrackWriterBase* NewL();
-
-	/**
-	 * Two-phased constructor.
-	 */
-	//static CTrackWriterBase* NewLC();
-	
+	// Custom properties and methods
+public:
 	virtual void AddPoint(const TPositionInfo* aPosInfo) = 0;
-
-//private:
-
-	/**
-	 * Constructor for performing 1st stage construction
-	 */
-	//CTrackWriterBase(TPath aFilePath);
-
-	/**
-	 * EPOC default constructor for performing 2nd stage construction
-	 */
-	//void ConstructL();
-
+	
 protected:
 	RFile iFile;
 
 	};
 
 
+/** 
+ *  Writes track to GPX 1.1 file
+ */
 class CGPXTrackWriter : public CTrackWriterBase
 	{
 public:
@@ -78,30 +56,34 @@ public:
 	/**
 	 * Two-phased constructor.
 	 */
-	static CGPXTrackWriter* NewL(RFile &aFile, TBool aWriteExtendedData = EFalse,
+	static CGPXTrackWriter* NewL(RFile &aFile, TBool anIsWriteExtendedData = EFalse,
 			const TDesC &aCreator = KNullDesC);
 
 	/**
 	 * Two-phased constructor.
 	 */
-	static CGPXTrackWriter* NewLC(RFile &aFile, TBool aWriteExtendedData = EFalse,
+	static CGPXTrackWriter* NewLC(RFile &aFile, TBool anIsWriteExtendedData = EFalse,
 			const TDesC &aCreator = KNullDesC);
-	
-	void AddPoint(const TPositionInfo* aPosInfo);
-	void StartNewSegment();
 
 private:
 
 	/**
 	 * Constructor for performing 1st stage construction
 	 */
-	CGPXTrackWriter(RFile &aFile, TBool aWriteExtendedData);
+	CGPXTrackWriter(RFile &aFile, TBool anIsWriteExtendedData);
 
 	/**
 	 * EPOC default constructor for performing 2nd stage construction
 	 */
 	void ConstructL(const TDesC &aCreator);
 	
+	
+	// Custom properties and methods
+public:
+	void AddPoint(const TPositionInfo* aPosInfo);
+	void StartNewSegment();
+	
+private:
 	TRealFormat iGeneralRealFormat;
 	TBool iIsSegmentOpened;
 	TBool iIsWriteExtendedData;

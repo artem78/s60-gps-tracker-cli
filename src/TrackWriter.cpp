@@ -11,40 +11,20 @@
 #include "TrackWriter.h"
 #include "LBSSatelliteExtended.h"
 
+// CTrackWriterBase
+
 CTrackWriterBase::CTrackWriterBase(RFile &aFile) :
 	iFile(aFile)
 	{
 	// No implementation required
 	}
 
-CTrackWriterBase::~CTrackWriterBase()
-	{
-	}
 
-/*CTrackWriterBase* CTrackWriterBase::NewLC()
-	{
-	CTrackWriterBase* self = new (ELeave) CTrackWriterBase();
-	CleanupStack::PushL(self);
-	self->ConstructL();
-	return self;
-	}*/
+// CGPXTrackWriter
 
-/*CTrackWriterBase* CTrackWriterBase::NewL()
-	{
-	CTrackWriterBase* self = CTrackWriterBase::NewLC();
-	CleanupStack::Pop(); // self;
-	return self;
-	}*/
-
-/*void CTrackWriterBase::ConstructL()
-	{
-
-	}*/
-
-
-CGPXTrackWriter::CGPXTrackWriter(RFile &aFile, TBool aWriteExtendedData) :
+CGPXTrackWriter::CGPXTrackWriter(RFile &aFile, TBool anIsWriteExtendedData) :
 	CTrackWriterBase(aFile),
-	iIsWriteExtendedData(aWriteExtendedData)
+	iIsWriteExtendedData(anIsWriteExtendedData)
 	{
 	// No implementation required
 	}
@@ -55,22 +35,22 @@ CGPXTrackWriter::~CGPXTrackWriter()
 	
 	_LIT8(KGPXContentEnd, "\t</trk>\n"
 			"</gpx>");
-	User::LeaveIfError(iFile.Write(KGPXContentEnd));
+	/*User::LeaveIfError(*/iFile.Write(KGPXContentEnd)/*)*/;
 	}
 
-CGPXTrackWriter* CGPXTrackWriter::NewLC(RFile &aFile, TBool aWriteExtendedData,
+CGPXTrackWriter* CGPXTrackWriter::NewLC(RFile &aFile, TBool anIsWriteExtendedData,
 		const TDesC &aCreator)
 	{
-	CGPXTrackWriter* self = new (ELeave) CGPXTrackWriter(aFile, aWriteExtendedData);
+	CGPXTrackWriter* self = new (ELeave) CGPXTrackWriter(aFile, anIsWriteExtendedData);
 	CleanupStack::PushL(self);
 	self->ConstructL(aCreator);
 	return self;
 	}
 
-CGPXTrackWriter* CGPXTrackWriter::NewL(RFile &aFile, TBool aWriteExtendedData,
+CGPXTrackWriter* CGPXTrackWriter::NewL(RFile &aFile, TBool anIsWriteExtendedData,
 		const TDesC &aCreator)
 	{
-	CGPXTrackWriter* self = CGPXTrackWriter::NewLC(aFile, aWriteExtendedData, aCreator);
+	CGPXTrackWriter* self = CGPXTrackWriter::NewLC(aFile, anIsWriteExtendedData, aCreator);
 	CleanupStack::Pop(); // self;
 	return self;
 	}
