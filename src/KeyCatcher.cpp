@@ -10,6 +10,8 @@
 
 #include "KeyCatcher.h"
 
+// CKeyCatcher
+
 CKeyCatcher::CKeyCatcher(CConsoleBase* aConsole, MKeyCatcherObserver* aObserver) :
 	CActive(EPriorityUserInput),
 	iConsole(aConsole),

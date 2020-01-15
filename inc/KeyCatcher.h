@@ -11,10 +11,12 @@
 #ifndef KEYCATCHER_H
 #define KEYCATCHER_H
 
+// INCLUDES
 #include <e32base.h>	// For CActive, link against: euser.lib
 #include <e32cons.h>
 #include <e32keys.h>
 
+// CLASS DECLARATION
 
 // Observer for recieving events from CKeyCatcher class.
 class MKeyCatcherObserver
