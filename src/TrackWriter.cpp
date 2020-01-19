@@ -87,23 +87,15 @@ void CGPXTrackWriter::AddPoint(const TPositionInfo* aPosInfo)
 	TPosition pos;
 	aPosInfo->GetPosition(pos);
 	
-	TBuf/*8*/<30> timeBuff;
-	_LIT/*8*/(KTimeFormatISO8601, "%F%Y-%M-%DT%H:%T:%S.%*C3");
+	// Get point`s date and time
+	TBuf<30> timeBuff;
+	_LIT(KTimeFormatISO8601, "%F%Y-%M-%DT%H:%T:%S.%*C3");
 	pos.Time().FormatL(timeBuff, KTimeFormatISO8601);
-	//TBuf8<30> timeBuff8;
-	//timeBuff8.Copy(timeBuff);	
-	
-	/*_LIT8(KGPXContentTrackPoint, "\t\t\t<trkpt lat=\"%f\" lon=\"%f\">\n"
-			"\t\t\t\t<ele>%f</ele>\n"
-			"\t\t\t\t<time>%S</time>\n"
-			"\t\t\t</trkpt>\n");*/	
 	
 	OpenSegment();
 	
-	//TBufC8<10> buff(_L8()("point\n"));
 	TBuf8<512> buff; // ToDo: Too much for stack
-	//buff.Format(KGPXContentTrackPoint, pos.Latitude(), pos.Longitude(), pos.Altitude(),
-	//		&timeBuff8); // ToDo: Using Append will be more effective
+	
 	buff.Append(_L("\t\t\t<trkpt lat=\""));
 	buff.AppendNum(pos.Latitude(), iGeneralRealFormat);
 	buff.Append(_L("\" lon=\""));
