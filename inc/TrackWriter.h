@@ -32,7 +32,7 @@ public:
 	
 	// Custom properties and methods
 public:
-	virtual void AddPoint(const TPositionInfo* aPosInfo) = 0;
+	virtual void AddPointL(const TPositionInfo* aPosInfo) = 0;
 	
 protected:
 	RFile iFile;
@@ -80,8 +80,8 @@ private:
 	
 	// Custom properties and methods
 public:
-	void AddPoint(const TPositionInfo* aPosInfo);
-	void StartNewSegment();
+	void AddPointL(const TPositionInfo* aPosInfo);
+	void StartNewSegmentL();
 	
 private:
 	TRealFormat iGeneralRealFormat;
@@ -89,8 +89,8 @@ private:
 	TBool iIsWriteExtendedData;
 	TBuf8<100> iCreator;
 	
-	void OpenSegment();
-	void CloseSegment();
+	void OpenSegmentL();
+	void CloseSegmentL();
 
 	};
 

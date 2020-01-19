@@ -492,7 +492,7 @@ void CGPSTrackerCLI::OnDisconnectedL()
 	LOG(_L8("Disconnected"));
 	ShowDataL();
 	
-	iTrackWriter->StartNewSegment();
+	iTrackWriter->StartNewSegmentL();
 	}
 
 void CGPSTrackerCLI::OnPositionUpdatedL()
@@ -517,7 +517,7 @@ void CGPSTrackerCLI::OnPositionUpdatedL()
 	LOG(_L8("iTotalDistance=%f"), iTotalDistance);
 	
 	// Write position to file
-	iTrackWriter->AddPoint(posInfo);
+	iTrackWriter->AddPointL(posInfo);
 	
 	// Write position to the screen	
 	ShowDataL();
@@ -575,7 +575,7 @@ void CGPSTrackerCLI::OnPauseTracking()
 	{
 	TRAP_IGNORE(ShowDataL());
 	
-	//iTrackWriter->StartNewSegment();
+	//iTrackWriter->StartNewSegmentL();
 	}
 
 void CGPSTrackerCLI::OnResumeTracking()

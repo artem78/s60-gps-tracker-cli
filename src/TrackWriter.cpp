@@ -31,7 +31,7 @@ CGPXTrackWriter::CGPXTrackWriter(RFile &aFile, TBool anIsWriteExtendedData) :
 
 CGPXTrackWriter::~CGPXTrackWriter()
 	{
-	CloseSegment();
+	CloseSegmentL();
 	
 	_LIT8(KGPXContentEnd, "\t</trk>\n"
 			"</gpx>");
@@ -60,7 +60,7 @@ void CGPXTrackWriter::ConstructL(const TDesC &aCreator)
 	if (iCreator.MaxLength() >= aCreator.Length())
 		iCreator.Copy(aCreator); // FixMe: Do not work with non ASCII symbols
 	else
-		User::Leave(/*KErrArgument*/ KErrBadDescriptor);
+		User::Leave(/*KErrArgument*/ /*KErrBadDescriptor*/ KErrOverflow);
 	
 	// Set general format for numbers
 	iGeneralRealFormat = TRealFormat();
@@ -82,7 +82,7 @@ void CGPXTrackWriter::ConstructL(const TDesC &aCreator)
 	User::LeaveIfError(iFile.Write(KGPXContentBegining2));
 	}
 
-void CGPXTrackWriter::AddPoint(const TPositionInfo* aPosInfo)
+void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 	{
 	TPosition pos;
 	aPosInfo->GetPosition(pos);
@@ -92,9 +92,11 @@ void CGPXTrackWriter::AddPoint(const TPositionInfo* aPosInfo)
 	_LIT(KTimeFormatISO8601, "%F%Y-%M-%DT%H:%T:%S.%*C3");
 	pos.Time().FormatL(timeBuff, KTimeFormatISO8601);
 	
-	OpenSegment();
+	OpenSegmentL();
 	
-	TBuf8<512> buff; // ToDo: Too much for stack
+	RBuf8 buff;
+	buff.CreateL(512);
+	buff.CleanupClosePushL();
 	
 	buff.Append(_L("\t\t\t<trkpt lat=\""));
 	buff.AppendNum(pos.Latitude(), iGeneralRealFormat);
@@ -173,29 +175,31 @@ void CGPXTrackWriter::AddPoint(const TPositionInfo* aPosInfo)
 	
 	buff.Append(_L8("\t\t\t</trkpt>\n"));
 	
-	iFile.Write(buff); // ToDo: Catch possible errors
-		// and rename AddPoint to AddPointL
+	User::LeaveIfError(iFile.Write(buff));
+	
+	// Cleanup resources
+	CleanupStack::PopAndDestroy(&buff);
 	}
 
-void CGPXTrackWriter::StartNewSegment()
+void CGPXTrackWriter::StartNewSegmentL()
 	{
-	CloseSegment();
+	CloseSegmentL();
 	}
 
-void CGPXTrackWriter::OpenSegment()
+void CGPXTrackWriter::OpenSegmentL()
 	{
 	if (!iIsSegmentOpened)
 		{
-		iFile.Write(_L8("\t\t<trkseg>\n"));
+		User::LeaveIfError(iFile.Write(_L8("\t\t<trkseg>\n")));
 		iIsSegmentOpened = ETrue;
 		}
 	}
 
-void CGPXTrackWriter::CloseSegment()
+void CGPXTrackWriter::CloseSegmentL()
 	{
 	if (iIsSegmentOpened)
 		{
-		iFile.Write(_L8("\t\t</trkseg>\n"));
+		User::LeaveIfError(iFile.Write(_L8("\t\t</trkseg>\n")));
 		iIsSegmentOpened = EFalse;
 		}
 	}
