@@ -38,6 +38,7 @@ private:
 	TUint iTotalPointsCount;
 	TReal iTotalDistance;
 	TBool iIsAfterConnectionRestored;
+	TInt iReturnCode; // Only used for passing code from Shutdown()
 	
 	CGPSTrackerCLI(CConsoleBase* aConsole);
 	void ConstructL();
@@ -60,13 +61,21 @@ private:
 	void InitializeTrackL();
 	void ShowDataL();
 	void /*Get*/ProgramDataDir(TDes &aDir);
+	void Shutdown(TInt aReturnCode = KErrNone);
 	
 public:
 	~CGPSTrackerCLI();
 	static CGPSTrackerCLI* NewL(CConsoleBase* aConsole);
 	static CGPSTrackerCLI* NewLC(CConsoleBase* aConsole);
-	
-	void Run();
+
+	/**
+	 * Runs tracker. This method returns only after program will be closed
+	 * or any fatal error occurred. Note: active scheduler must be created
+	 * before call this method.
+	 * 
+	 * @return Error code or KErrNone
+	 */
+	TInt Run();
 	
 	// Events
 	void OnPositionUpdatedL();

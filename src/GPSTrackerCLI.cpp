@@ -176,9 +176,17 @@ void CGPSTrackerCLI::InitializeTrackL()
 	iTrackWriter = CGPXTrackWriter::NewL(iTrackFile, ETrue, programFullName);
 	}
 
-void CGPSTrackerCLI::Run()
+TInt CGPSTrackerCLI::Run()
 	{
 	CActiveScheduler::Start();
+	return iReturnCode;
+	}
+
+void CGPSTrackerCLI::Shutdown(TInt aReturnCode)
+	{
+	LOG(_L8("Program exit with code %d"), aReturnCode);
+	iReturnCode = aReturnCode;
+	CActiveScheduler::Stop();
 	}
 
 void CGPSTrackerCLI::ShowDataL()
@@ -532,10 +540,7 @@ void CGPSTrackerCLI::OnPositionPartialUpdated()
 
 void CGPSTrackerCLI::OnErrorL(TInt aErrCode)
 	{
-	_LIT(KTextError, "Error: %d");
-	
-	iConsole->ClearScreen();
-	iConsole->Printf(KTextError, aErrCode);  // ToDo: Move to const
+	Shutdown(aErrCode);
 	}
 
 void CGPSTrackerCLI::OnKeyPressed(TKeyCode aKeyCode)
@@ -544,8 +549,7 @@ void CGPSTrackerCLI::OnKeyPressed(TKeyCode aKeyCode)
 		{
 		case EKeyDownArrow:
 			{
-			LOG(_L8("Program exit"));
-			CActiveScheduler::Stop(); // Exit
+			Shutdown();
 			break;
 			}
 		case EKeyUpArrow:
@@ -589,9 +593,11 @@ LOCAL_C void MainL()
 	{
 	CGPSTrackerCLI* tracker = CGPSTrackerCLI::NewL(gConsole);
 	//CleanupStack::PushL(tracker);
-	tracker->Run();
+	TInt r = tracker->Run();
 	//CleanupStack::PopAndDestroy(tracker);
 	delete tracker;
+	
+	User::LeaveIfError(r);
 	}
 
 LOCAL_C void DoStartL()
@@ -611,8 +617,8 @@ LOCAL_C void DoStartL()
 
 GLDEF_C TInt E32Main()
 	{
-	_LIT(KTextFailed, " failed, leave code = %d");
-	_LIT(KTextPressAnyKeyToQuit, " [press any key to quit]\n");
+	_LIT(KTextError, "Error: %d\n");
+	_LIT(KTextPressAnyKeyToQuit, "\nPress any key to quit...\n");
 	
 	// Create cleanup stack
 	__UHEAP_MARK;
@@ -632,7 +638,8 @@ GLDEF_C TInt E32Main()
 	TRAPD(mainError, DoStartL());
 	if (mainError)
 		{
-		gConsole->Printf(KTextFailed, mainError);
+		gConsole->ClearScreen();
+		gConsole->Printf(KTextError, mainError);
 		gConsole->Printf(KTextPressAnyKeyToQuit);
 		gConsole->Getch();
 		}
@@ -640,6 +647,7 @@ GLDEF_C TInt E32Main()
 	delete gConsole;
 	delete cleanup;
 	__UHEAP_MARKEND;
-	return KErrNone;
+	return /*KErrNone*/ mainError;  // ToDo: Find out how this value processed outside
+									// by application framework?
 	}
 
