@@ -220,10 +220,10 @@ void CGPSTrackerCLI::ShowDataL()
 	const TChar KLineBreak = TChar(0x0A);
 	const TChar KForwardSlash = TChar(0x2F);
 
-	_LIT(KMetresUnit, "m");
+	_LIT(KMetersUnit, "m");
 	_LIT(KKilometersUnit, "km");
 	#ifdef _DEBUG
-	_LIT(KMetresPerSecondsUnit, "m/s");
+	_LIT(KMetersPerSecondsUnit, "m/s");
 	#endif
 	_LIT(KKilometersPerHourUnit, "km/h");
 	_LIT(KSecondsUnit, "s");
@@ -233,6 +233,9 @@ void CGPSTrackerCLI::ShowDataL()
 	const TInt KLabelMaxWidth = 23;
 	TRealFormat shortRealFmt = TRealFormat(10, 1);
 	TRealFormat longRealFmt = TRealFormat(10, 5);
+	
+	const TReal KSpeedRatio  = 3.6; // m/s to km/h
+	const TReal KMetersInKilometer = 1000.0;
 	
 	
 	TPositionInfo* posInfo = iPosRequestor->LastKnownPositionInfo(); 
@@ -283,7 +286,7 @@ void CGPSTrackerCLI::ShowDataL()
 		{
 		buff.AppendNum(pos.Altitude(), shortRealFmt);
 		buff.Append(KSpace);
-		buff.Append(KMetresUnit);
+		buff.Append(KMetersUnit);
 		}
 	else
 		buff.Append(KTextNoValue);
@@ -295,7 +298,7 @@ void CGPSTrackerCLI::ShowDataL()
 		{
 		buff.AppendNum(pos.HorizontalAccuracy(), shortRealFmt);
 		buff.Append(KSpace);
-		buff.Append(KMetresUnit);
+		buff.Append(KMetersUnit);
 		}
 	else
 		buff.Append(KTextNoValue);
@@ -307,7 +310,7 @@ void CGPSTrackerCLI::ShowDataL()
 		{
 		buff.AppendNum(pos.VerticalAccuracy(), shortRealFmt);
 		buff.Append(KSpace);
-		buff.Append(KMetresUnit);
+		buff.Append(KMetersUnit);
 		}
 	else
 		buff.Append(KTextNoValue);
@@ -324,7 +327,7 @@ void CGPSTrackerCLI::ShowDataL()
 		buff.AppendJustify(KTextSpeed, KLabelMaxWidth, ERight, KSpace);
 		if (iPosRequestor->IsPositionRecieved() && !Math::IsNaN(course.Speed()))
 			{
-			buff.AppendNum(course.Speed() * 3.6, shortRealFmt);
+			buff.AppendNum(course.Speed() * KSpeedRatio, shortRealFmt);
 			buff.Append(KSpace);
 			buff.Append(KKilometersPerHourUnit);
 #ifdef _DEBUG
@@ -332,7 +335,7 @@ void CGPSTrackerCLI::ShowDataL()
 			buff.Append(TChar(0x28));
 			buff.AppendNum(course.Speed(), longRealFmt);
 			buff.Append(KSpace);
-			buff.Append(KMetresPerSecondsUnit);
+			buff.Append(KMetersPerSecondsUnit);
 			buff.Append(TChar(0x29));
 #endif
 			}
@@ -428,15 +431,15 @@ void CGPSTrackerCLI::ShowDataL()
 	
 	// Total distance
 	buff.AppendJustify(KTextTotalDistance, KLabelMaxWidth, ERight, KSpace);
-	if (iTotalDistance < 1000.0) // For <1km show distance in tens of meters
+	if (iTotalDistance < KMetersInKilometer) // For <1km show distance in tens of meters
 		{
 		buff.AppendNum((TInt) /*(*/ iTotalDistance /*+ 5)*/ / 10 * 10);
 		buff.Append(KSpace);
-		buff.Append(KMetresUnit);
+		buff.Append(KMetersUnit);
 		}
 	else // Show distance in kilometers
 		{
-		buff.AppendNum(iTotalDistance / 1000.0, shortRealFmt);
+		buff.AppendNum(iTotalDistance / KMetersInKilometer, shortRealFmt);
 		buff.Append(KSpace);
 		buff.Append(KKilometersUnit);
 		}
