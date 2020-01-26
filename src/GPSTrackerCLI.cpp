@@ -489,21 +489,26 @@ void CGPSTrackerCLI::/*Get*/ProgramDataDir(TDes &aDir)
 	aDir.Append(KProgramDataDirWithoutDrive);
 	}
 
-void CGPSTrackerCLI::OnConnectedL()
+void CGPSTrackerCLI::OnConnected()
 	{
 	LOG(_L8("Connected"));
 	iIsAfterConnectionRestored = ETrue;
 	}
 
-void CGPSTrackerCLI::OnDisconnectedL()
+void CGPSTrackerCLI::OnDisconnected()
 	{
 	LOG(_L8("Disconnected"));
-	ShowDataL();
+	TRAP_IGNORE(ShowDataL());
 	
-	iTrackWriter->StartNewSegmentL();
+	TRAPD(r, iTrackWriter->StartNewSegmentL());
+	if (r != KErrNone)
+		{
+		LOG(_L8("Error start new segment in gpx with code %d"), r);
+		Shutdown(r);
+		}
 	}
 
-void CGPSTrackerCLI::OnPositionUpdatedL()
+void CGPSTrackerCLI::OnPositionUpdated()
 	{
 	TPositionInfo* posInfo = iPosRequestor->LastKnownPositionInfo();
 	TPosition pos;
@@ -525,10 +530,15 @@ void CGPSTrackerCLI::OnPositionUpdatedL()
 	LOG(_L8("iTotalDistance=%f"), iTotalDistance);
 	
 	// Write position to file
-	iTrackWriter->AddPointL(posInfo);
+	TRAPD(r, iTrackWriter->AddPointL(posInfo));
+	if (r != KErrNone)
+		{
+		LOG(_L8("Error write position to the file with code %d"), r);
+		Shutdown(r);
+		}
 	
 	// Write position to the screen	
-	ShowDataL();
+	TRAP_IGNORE(ShowDataL());
 	
 	iIsAfterConnectionRestored = EFalse;
 	}
@@ -538,7 +548,7 @@ void CGPSTrackerCLI::OnPositionPartialUpdated()
 	TRAP_IGNORE(ShowDataL());
 	}
 
-void CGPSTrackerCLI::OnErrorL(TInt aErrCode)
+void CGPSTrackerCLI::OnError(TInt aErrCode)
 	{
 	Shutdown(aErrCode);
 	}
@@ -579,7 +589,7 @@ void CGPSTrackerCLI::OnPauseTracking()
 	{
 	TRAP_IGNORE(ShowDataL());
 	
-	//iTrackWriter->StartNewSegmentL();
+	//TRAP(r, iTrackWriter->StartNewSegmentL());
 	}
 
 void CGPSTrackerCLI::OnResumeTracking()

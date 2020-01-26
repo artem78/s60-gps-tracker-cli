@@ -78,11 +78,11 @@ public:
 	TInt Run();
 	
 	// Events
-	void OnPositionUpdatedL();
+	void OnPositionUpdated();
 	void OnPositionPartialUpdated();
-	void OnConnectedL();
-	void OnDisconnectedL();
-	void OnErrorL(TInt aErrCode);
+	void OnConnected();
+	void OnDisconnected();
+	void OnError(TInt aErrCode);
 	void OnKeyPressed(TKeyCode aKeyCode);
 	void OnPauseTracking();
 	void OnResumeTracking();

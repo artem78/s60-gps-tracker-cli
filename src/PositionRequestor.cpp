@@ -189,18 +189,14 @@ void CPositionRequestor::RunL()
             
             /*if (iState != EPositionRecieved) {
 				iState = EPositionRecieved;
-				TRAP_IGNORE(
-					iListener->onConnectedL();
-				);
+				iListener->onConnected();
             }*/
             SetState(EPositionRecieved);
             
             
             // Pre process the position information
             //PositionUpdatedL();
-            TRAP_IGNORE(
-            	iListener->OnPositionUpdatedL();
-            );
+            iListener->OnPositionUpdated();
             
 			iPositioner.NotifyPositionUpdate(*iLastPosInfo, iStatus);
 			SetActive();
@@ -251,9 +247,7 @@ void CPositionRequestor::RunL()
         	
         	SetState(EPositionNotRecieved);
         	
-            TRAP_IGNORE(
-            	iListener->OnPositionPartialUpdated();
-            );
+            iListener->OnPositionPartialUpdated();
             
 			iPositioner.NotifyPositionUpdate(*iLastPosInfo, iStatus);
 			SetActive();
@@ -269,9 +263,7 @@ void CPositionRequestor::RunL()
             
             /*if (iState != EPositionNotRecieved) {
 				iState = EPositionNotRecieved;
-				TRAP_IGNORE(
-					iListener->onDisConnectedL();
-				);
+				iListener->onDisConnected();
             }*/
             SetState(EPositionNotRecieved);
             
@@ -296,9 +288,7 @@ void CPositionRequestor::RunL()
             
             SetState(EStopped);
             
-            TRAP_IGNORE(
-            		iListener->OnErrorL(iStatus.Int());
-            );
+            iListener->OnError(iStatus.Int());
 
             break;
             }
@@ -325,14 +315,10 @@ void CPositionRequestor::SetState(TInt aState)
 	
 	if (oldState != aState) {
 		if (aState == EPositionRecieved) {
-			TRAP_IGNORE(
-					iListener->OnConnectedL(); // FixMe: Leave in onConnectedL not cached (why???)
-			);
+			iListener->OnConnected();
 		} else if (oldState == EPositionRecieved ||
 				oldState == EStopped && aState == EPositionNotRecieved) {
-			TRAP_IGNORE(
-					iListener->OnDisconnectedL();
-			);
+			iListener->OnDisconnected();
 		}
 	}
 	}
