@@ -88,7 +88,6 @@ private:
 	TRealFormat iGeneralRealFormat;
 	TBool iIsSegmentOpened;
 	TBool iIsWriteExtendedData;
-	TBuf<100> iCreator;
 	CSimpleXMLWriter *iXml;
 	
 	void OpenSegmentL();

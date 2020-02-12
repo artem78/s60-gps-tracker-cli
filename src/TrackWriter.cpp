@@ -60,11 +60,6 @@ CGPXTrackWriter* CGPXTrackWriter::NewL(RFile &aFile, TBool anIsWriteExtendedData
 
 void CGPXTrackWriter::ConstructL(const TDesC &aCreator)
 	{
-	if (iCreator.MaxLength() >= aCreator.Length())
-		iCreator.Copy(aCreator);
-	else
-		User::Leave(/*KErrArgument*/ /*KErrBadDescriptor*/ KErrOverflow);
-	
 	// Set general format for numbers
 	iGeneralRealFormat = TRealFormat();
 	iGeneralRealFormat.iType = KRealFormatFixed;
@@ -79,7 +74,7 @@ void CGPXTrackWriter::ConstructL(const TDesC &aCreator)
 	iXml->OpenTagL(_L("gpx"));
 	iXml->AddAttributeL(_L("xmlns"), _L("http://www.topografix.com/GPX/1/1"));
 	iXml->AddAttributeL(_L("version"), _L("1.1"));
-	iXml->AddAttributeL(_L("creator"), iCreator);
+	iXml->AddAttributeL(_L("creator"), aCreator);
 	iXml->AddAttributeL(_L("xmlns:xsi"),
 			_L("http://www.w3.org/2001/XMLSchema-instance"));
 	iXml->AddAttributeL(_L("xsi:schemaLocation"),
