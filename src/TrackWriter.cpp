@@ -31,6 +31,8 @@ CGPXTrackWriter::CGPXTrackWriter(RFile &aFile, TBool anIsWriteExtendedData) :
 
 CGPXTrackWriter::~CGPXTrackWriter()
 	{
+	// FixMe: Leave may occured in destructor
+	
 	CloseSegmentL();
 
 	iXml->CloseTagL(); // </trk>
@@ -97,7 +99,8 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 	pos.Time().FormatL(timeBuff, KTimeFormatISO8601);
 	
 	OpenSegmentL();
-
+	
+	// Write base position information
 	iXml->OpenTagL(_L("trkpt"));
 	iXml->AddAttributeL(_L("lat"), pos.Latitude(), iGeneralRealFormat);
 	iXml->AddAttributeL(_L("lon"), pos.Longitude(), iGeneralRealFormat);
@@ -111,7 +114,7 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 	iXml->CloseTagL(); // </time>
 	
 	
-	// Extended position information
+	// Write extended position information
 	if (iIsWriteExtendedData)
 		{
 		// Process course info
