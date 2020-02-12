@@ -71,16 +71,27 @@ void CGPXTrackWriter::ConstructL(const TDesC &aCreator)
 	// Create XML object
 	iXml = CSimpleXMLWriter::NewL(iFile, TXMLVersion(1, 0), ETrue);
 	
-	iXml->OpenTagL(_L("gpx"));
-	iXml->AddAttributeL(_L("xmlns"), _L("http://www.topografix.com/GPX/1/1"));
-	iXml->AddAttributeL(_L("version"), _L("1.1"));
-	iXml->AddAttributeL(_L("creator"), aCreator);
-	iXml->AddAttributeL(_L("xmlns:xsi"),
-			_L("http://www.w3.org/2001/XMLSchema-instance"));
-	iXml->AddAttributeL(_L("xsi:schemaLocation"),
-			_L("http://www.topografix.com/GPX/1/1 "
-			"http://www.topografix.com/GPX/1/1/gpx.xsd"));
-	iXml->OpenTagL(_L("trk"));
+	// Write heading data to file
+	_LIT(KGpx,			"gpx");
+	_LIT(KXmlns,		"xmlns");
+	_LIT(KXmlnsValue,	"http://www.topografix.com/GPX/1/1");
+	_LIT(KVersion,		"version");
+	_LIT(KVersionValue,	"1.1");
+	_LIT(KCreator,		"creator");
+	_LIT(KXmlnsXsi,		"xmlns:xsi");
+	_LIT(KXmlnsXsiValue,	"http://www.w3.org/2001/XMLSchema-instance");
+	_LIT(KXsiSchemaLocation,		"xsi:schemaLocation");
+	_LIT(KXsiSchemaLocationValue,	"http://www.topografix.com/GPX/1/1 "
+							"http://www.topografix.com/GPX/1/1/gpx.xsd");
+	_LIT(KTrk, "trk");
+	
+	iXml->OpenTagL(KGpx);
+	iXml->AddAttributeL(KXmlns, KXmlnsValue);
+	iXml->AddAttributeL(KVersion, KVersionValue);
+	iXml->AddAttributeL(KCreator, aCreator);
+	iXml->AddAttributeL(KXmlnsXsi, KXmlnsXsiValue);
+	iXml->AddAttributeL(KXsiSchemaLocation, KXsiSchemaLocationValue);
+	iXml->OpenTagL(KTrk);
 	}
 
 void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
@@ -95,16 +106,29 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 	
 	OpenSegmentL();
 	
-	// Write base position information
-	iXml->OpenTagL(_L("trkpt"));
-	iXml->AddAttributeL(_L("lat"), pos.Latitude(), iGeneralRealFormat);
-	iXml->AddAttributeL(_L("lon"), pos.Longitude(), iGeneralRealFormat);
+	// Text constants
+	_LIT(KTrkpt,	"trkpt");
+	_LIT(KLat,		"lat");
+	_LIT(KLon,		"lon");
+	_LIT(KEle,		"ele");
+	_LIT(KTime,		"time");
+	_LIT(KCourse,	"course");
+	_LIT(KSpeed,	"speed");
+	_LIT(KSat,		"sat");
+	_LIT(KHDoP,		"hdop");
+	_LIT(KVDoP,		"vdop");
+	_LIT(KPDoP,		"pdop");
 	
-	iXml->OpenTagL(_L("ele"));
+	// Write base position information
+	iXml->OpenTagL(KTrkpt);
+	iXml->AddAttributeL(KLat, pos.Latitude(), iGeneralRealFormat);
+	iXml->AddAttributeL(KLon, pos.Longitude(), iGeneralRealFormat);
+
+	iXml->OpenTagL(KEle);
 	iXml->AddTextL(pos.Altitude(), iGeneralRealFormat);
 	iXml->CloseTagL(); // </ele>
 	
-	iXml->OpenTagL(_L("time"));
+	iXml->OpenTagL(KTime);
 	iXml->AddTextL(timeBuff);
 	iXml->CloseTagL(); // </time>
 	
@@ -123,7 +147,7 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 			// Course
 			if (!Math::IsNaN(course.Heading()))
 				{
-				iXml->OpenTagL(_L("course"));
+				iXml->OpenTagL(KCourse);
 				iXml->AddTextL(course.Heading(), iGeneralRealFormat);
 				iXml->CloseTagL(); // </course>
 				}
@@ -131,7 +155,7 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 			// Speed
 			if (!Math::IsNaN(course.Speed()))
 				{
-				iXml->OpenTagL(_L("speed"));
+				iXml->OpenTagL(KSpeed);
 				iXml->AddTextL(course.Speed(), iGeneralRealFormat);
 				iXml->CloseTagL(); // </speed>
 				}
@@ -144,14 +168,14 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 					static_cast<const TPositionSatelliteInfoExtended*>(aPosInfo);
 			
 			// Satellites count
-			iXml->OpenTagL(_L("sat"));
+			iXml->OpenTagL(KSat);
 			iXml->AddTextL(satelliteInfo->NumSatellitesUsed());
 			iXml->CloseTagL(); // </sat>
 			
 			// HDOP
 			if (!Math::IsNaN(satelliteInfo->HorizontalDoP()))
 				{
-				iXml->OpenTagL(_L("hdop"));
+				iXml->OpenTagL(KHDoP);
 				iXml->AddTextL(satelliteInfo->HorizontalDoP(), iGeneralRealFormat);
 				iXml->CloseTagL(); // </hdop>
 				}
@@ -159,7 +183,7 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 			// VDOP
 			if (!Math::IsNaN(satelliteInfo->VerticalDoP()))
 				{
-				iXml->OpenTagL(_L("vdop"));
+				iXml->OpenTagL(KVDoP);
 				iXml->AddTextL(satelliteInfo->VerticalDoP(), iGeneralRealFormat);
 				iXml->CloseTagL(); // </vdop>
 				}
@@ -167,7 +191,7 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 			// PDOP
 			if (!Math::IsNaN(satelliteInfo->PositionDoP()))
 				{
-				iXml->OpenTagL(_L("pdop"));
+				iXml->OpenTagL(KPDoP);
 				iXml->AddTextL(satelliteInfo->PositionDoP(), iGeneralRealFormat);
 				iXml->CloseTagL(); // </pdop>
 				}
@@ -186,7 +210,8 @@ void CGPXTrackWriter::OpenSegmentL()
 	{
 	if (!iIsSegmentOpened)
 		{
-		iXml->OpenTagL(_L("trkseg"));
+		_LIT(KTrkseg, "trkseg");
+		iXml->OpenTagL(KTrkseg);
 		iIsSegmentOpened = ETrue;
 		}
 	}
