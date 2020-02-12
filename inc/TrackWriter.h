@@ -16,6 +16,7 @@
 #include <e32base.h>
 #include <lbs.h>
 #include <f32file.h>
+#include <XML.h>
 
 // CLASS DECLARATION
 
@@ -87,7 +88,8 @@ private:
 	TRealFormat iGeneralRealFormat;
 	TBool iIsSegmentOpened;
 	TBool iIsWriteExtendedData;
-	TBuf8<100> iCreator;
+	TBuf<100> iCreator;
+	CSimpleXMLWriter *iXml;
 	
 	void OpenSegmentL();
 	void CloseSegmentL();

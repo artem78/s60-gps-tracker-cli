@@ -17,7 +17,7 @@ SYSTEMINCLUDE   \epoc32\include
 SOURCEPATH	  ..\src
 SOURCE		  GPSTrackerCLI.cpp PositionRequestor.cpp
 
-LIBRARY		 euser.lib lbs.lib efsrv.lib
+LIBRARY		 euser.lib lbs.lib efsrv.lib charconv.lib bafl.lib
 
 #ifdef ENABLE_ABIV2_MODE
 DEBUGGABLE_UDEBONLY
@@ -36,4 +36,4 @@ START RESOURCE GPSTrackerCLI_reg.rss
 	TARGETPATH \private\10003a3f\apps
 END
 SOURCEPATH ..\src
-SOURCE LBSSatelliteExtended.cpp
+SOURCE LBSSatelliteExtended.cpp XML.cpp

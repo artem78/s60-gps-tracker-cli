@@ -32,10 +32,11 @@ CGPXTrackWriter::CGPXTrackWriter(RFile &aFile, TBool anIsWriteExtendedData) :
 CGPXTrackWriter::~CGPXTrackWriter()
 	{
 	CloseSegmentL();
+
+	iXml->CloseTagL(); // </trk>
+	iXml->CloseTagL(); // </gpx>
 	
-	_LIT8(KGPXContentEnd, "\t</trk>\n"
-			"</gpx>");
-	/*User::LeaveIfError(*/iFile.Write(KGPXContentEnd)/*)*/;
+	delete iXml;
 	}
 
 CGPXTrackWriter* CGPXTrackWriter::NewLC(RFile &aFile, TBool anIsWriteExtendedData,
@@ -58,7 +59,7 @@ CGPXTrackWriter* CGPXTrackWriter::NewL(RFile &aFile, TBool anIsWriteExtendedData
 void CGPXTrackWriter::ConstructL(const TDesC &aCreator)
 	{
 	if (iCreator.MaxLength() >= aCreator.Length())
-		iCreator.Copy(aCreator); // FixMe: Do not work with non ASCII symbols
+		iCreator.Copy(aCreator);
 	else
 		User::Leave(/*KErrArgument*/ /*KErrBadDescriptor*/ KErrOverflow);
 	
@@ -70,16 +71,19 @@ void CGPXTrackWriter::ConstructL(const TDesC &aCreator)
 	iGeneralRealFormat.iTriLen = 0;
 	iGeneralRealFormat.iWidth = KDefaultRealWidth;
 	
+	// Create XML object
+	iXml = CSimpleXMLWriter::NewL(iFile, TXMLVersion(1, 0), ETrue);
 	
-	_LIT8(KGPXContentBegining1, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			"<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" version=\"1.1\"\n"
-			"creator=\"");
-	_LIT8(KGPXContentBegining2, "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			"xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n"
-			"\t<trk>\n");
-	User::LeaveIfError(iFile.Write(KGPXContentBegining1));
-	User::LeaveIfError(iFile.Write(iCreator));
-	User::LeaveIfError(iFile.Write(KGPXContentBegining2));
+	iXml->OpenTagL(_L("gpx"));
+	iXml->AddAttributeL(_L("xmlns"), _L("http://www.topografix.com/GPX/1/1"));
+	iXml->AddAttributeL(_L("version"), _L("1.1"));
+	iXml->AddAttributeL(_L("creator"), iCreator);
+	iXml->AddAttributeL(_L("xmlns:xsi"),
+			_L("http://www.w3.org/2001/XMLSchema-instance"));
+	iXml->AddAttributeL(_L("xsi:schemaLocation"),
+			_L("http://www.topografix.com/GPX/1/1 "
+			"http://www.topografix.com/GPX/1/1/gpx.xsd"));
+	iXml->OpenTagL(_L("trk"));
 	}
 
 void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
@@ -93,20 +97,19 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 	pos.Time().FormatL(timeBuff, KTimeFormatISO8601);
 	
 	OpenSegmentL();
+
+	iXml->OpenTagL(_L("trkpt"));
+	iXml->AddAttributeL(_L("lat"), pos.Latitude(), iGeneralRealFormat);
+	iXml->AddAttributeL(_L("lon"), pos.Longitude(), iGeneralRealFormat);
 	
-	RBuf8 buff;
-	buff.CreateL(512);
-	buff.CleanupClosePushL();
+	iXml->OpenTagL(_L("ele"));
+	iXml->AddTextL(pos.Altitude(), iGeneralRealFormat);
+	iXml->CloseTagL(); // </ele>
 	
-	buff.Append(_L("\t\t\t<trkpt lat=\""));
-	buff.AppendNum(pos.Latitude(), iGeneralRealFormat);
-	buff.Append(_L("\" lon=\""));
-	buff.AppendNum(pos.Longitude(), iGeneralRealFormat);
-	buff.Append(_L("\">\n\t\t\t\t<ele>"));
-	buff.AppendNum(pos.Altitude(), iGeneralRealFormat);
-	buff.Append(_L("</ele>\n\t\t\t\t<time>"));
-	buff.Append(timeBuff);
-	buff.Append(_L("</time>\n"));
+	iXml->OpenTagL(_L("time"));
+	iXml->AddTextL(timeBuff);
+	iXml->CloseTagL(); // </time>
+	
 	
 	// Extended position information
 	if (iIsWriteExtendedData)
@@ -122,17 +125,17 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 			// Course
 			if (!Math::IsNaN(course.Heading()))
 				{
-				buff.Append(_L("\t\t\t\t<course>"));
-				buff.AppendNum(course.Heading(), iGeneralRealFormat);
-				buff.Append(_L("</course>\n"));
+				iXml->OpenTagL(_L("course"));
+				iXml->AddTextL(course.Heading(), iGeneralRealFormat);
+				iXml->CloseTagL(); // </course>
 				}
 			
 			// Speed
 			if (!Math::IsNaN(course.Speed()))
 				{
-				buff.Append(_L("\t\t\t\t<speed>"));
-				buff.AppendNum(course.Speed(), iGeneralRealFormat);
-				buff.Append(_L("</speed>\n"));
+				iXml->OpenTagL(_L("speed"));
+				iXml->AddTextL(course.Speed(), iGeneralRealFormat);
+				iXml->CloseTagL(); // </speed>
 				}
 			}
 		
@@ -143,42 +146,37 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 					static_cast<const TPositionSatelliteInfoExtended*>(aPosInfo);
 			
 			// Satellites count
-			buff.Append(_L("\t\t\t\t<sat>"));
-			buff.AppendNum(satelliteInfo->NumSatellitesUsed());
-			buff.Append(_L("</sat>\n"));
+			iXml->OpenTagL(_L("sat"));
+			iXml->AddTextL(satelliteInfo->NumSatellitesUsed());
+			iXml->CloseTagL(); // </sat>
 			
 			// HDOP
 			if (!Math::IsNaN(satelliteInfo->HorizontalDoP()))
 				{
-				buff.Append(_L("\t\t\t\t<hdop>"));
-				buff.AppendNum(satelliteInfo->HorizontalDoP(), iGeneralRealFormat);
-				buff.Append(_L("</hdop>\n"));
+				iXml->OpenTagL(_L("hdop"));
+				iXml->AddTextL(satelliteInfo->HorizontalDoP(), iGeneralRealFormat);
+				iXml->CloseTagL(); // </hdop>
 				}
 			
 			// VDOP
 			if (!Math::IsNaN(satelliteInfo->VerticalDoP()))
 				{
-				buff.Append(_L("\t\t\t\t<vdop>"));
-				buff.AppendNum(satelliteInfo->VerticalDoP(), iGeneralRealFormat);
-				buff.Append(_L("</vdop>\n"));
+				iXml->OpenTagL(_L("vdop"));
+				iXml->AddTextL(satelliteInfo->VerticalDoP(), iGeneralRealFormat);
+				iXml->CloseTagL(); // </vdop>
 				}
 			
 			// PDOP
 			if (!Math::IsNaN(satelliteInfo->PositionDoP()))
 				{
-				buff.Append(_L("\t\t\t\t<pdop>"));
-				buff.AppendNum(satelliteInfo->PositionDoP(), iGeneralRealFormat);
-				buff.Append(_L("</pdop>\n"));
+				iXml->OpenTagL(_L("pdop"));
+				iXml->AddTextL(satelliteInfo->PositionDoP(), iGeneralRealFormat);
+				iXml->CloseTagL(); // </pdop>
 				}
 			}
 		}
 	
-	buff.Append(_L8("\t\t\t</trkpt>\n"));
-	
-	User::LeaveIfError(iFile.Write(buff));
-	
-	// Cleanup resources
-	CleanupStack::PopAndDestroy(&buff);
+	iXml->CloseTagL(); // </trkpt>
 	}
 
 void CGPXTrackWriter::StartNewSegmentL()
@@ -190,7 +188,7 @@ void CGPXTrackWriter::OpenSegmentL()
 	{
 	if (!iIsSegmentOpened)
 		{
-		User::LeaveIfError(iFile.Write(_L8("\t\t<trkseg>\n")));
+		iXml->OpenTagL(_L("trkseg"));
 		iIsSegmentOpened = ETrue;
 		}
 	}
@@ -199,7 +197,7 @@ void CGPXTrackWriter::CloseSegmentL()
 	{
 	if (iIsSegmentOpened)
 		{
-		User::LeaveIfError(iFile.Write(_L8("\t\t</trkseg>\n")));
+		iXml->CloseTagL(); // </trkseg>
 		iIsSegmentOpened = EFalse;
 		}
 	}
