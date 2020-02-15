@@ -15,7 +15,7 @@ USERINCLUDE	 ..\inc
 SYSTEMINCLUDE   \epoc32\include
 
 SOURCEPATH	  ..\src
-SOURCE		  GPSTrackerCLI.cpp PositionRequestor.cpp
+SOURCE		  GPSTrackerCLI.cpp
 
 LIBRARY		 euser.lib lbs.lib efsrv.lib charconv.lib bafl.lib
 
@@ -25,7 +25,7 @@ DEBUGGABLE_UDEBONLY
 CAPABILITY Location
 
 SOURCEPATH ..\src
-SOURCE KeyCatcher.cpp TrackWriter.cpp Logger.cpp
+SOURCE Positioning.cpp KeyCatcher.cpp TrackWriter.cpp Logger.cpp
 SOURCEPATH ..\data
 START RESOURCE GPSTrackerCLI.rss
 	TARGETPATH \resource\apps

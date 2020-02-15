@@ -1,14 +1,14 @@
 /*
  ============================================================================
- Name		: PositionRequestor.cpp
+ Name		: Positioning.cpp
  Author	  : artem78
  Version	 : 1.0
  Copyright   : 
- Description : CPositionRequestor implementation
+ Description :
  ============================================================================
  */
 
-#include "PositionRequestor.h"
+#include "Positioning.h"
 #include "Logger.h"
 #include <lbssatellite.h>
 

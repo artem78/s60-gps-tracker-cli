@@ -17,9 +17,7 @@
 #include "Logger.h"
 #include <lbspositioninfo.h>
 #include "LBSSatelliteExtended.h"
-
-#include "PositionListener.h"
-#include "PositionRequestor.h"
+#include "Positioning.h"
 #include "TrackWriter.h"
 
 

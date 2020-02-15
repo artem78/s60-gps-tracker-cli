@@ -15,8 +15,7 @@
 #include <e32base.h>
 #include <e32cons.h>
 
-#include "PositionListener.h"
-#include "PositionRequestor.h"
+#include "Positioning.h"
 #include "TrackWriter.h"
 #include "KeyCatcher.h"
 
