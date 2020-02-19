@@ -8,35 +8,39 @@
  ============================================================================
  */
 
-//TODO: Return satellites info 
 
 #ifndef POSITIONING_H
 #define POSITIONING_H
 
 #include <e32base.h>	// For CActive, link against: euser.lib
-//#include <e32std.h>		// For RTimer, link against: euser.lib
 #include <lbs.h>
-//#pragma comment(lib, "c:\\Symbian\\9.2\\S60_3rd_FP1\\Epoc32\\release\\winscw\\udeb\\lbs.lib") // TODO: Change path to local
 #include <e32math.h>
 #include "Logger.h"
 
+
+// Constants
 
 const TInt KSecond = 1000000;
 const TInt KDefaultPositionUpdateInterval = /* 5 * */ KSecond;
 const TInt KDefaultPositionUpdateTimeOut = /*15 * KSecond*/ KDefaultPositionUpdateInterval * 5;
 
 
+// Classes
+
 class MPositionListener
 	{
 public:
 	virtual void OnPositionUpdated() = 0;
 	virtual void OnPositionPartialUpdated() = 0;
-	virtual void OnConnected() = 0;
-	virtual void OnDisconnected() = 0;
-	virtual void OnError(TInt aErrCode) = 0;
+	virtual void OnPositionRestored() = 0;
+	virtual void OnPositionLost() = 0;
+	virtual void OnPositionError(TInt aErrCode) = 0;
 	};
 
 
+/*
+ * Periodically get information about current location.
+ */
 class CPositionRequestor : public CActive
 	{
 public:
@@ -56,25 +60,20 @@ public:
 public:
 	// New functions
 	// Function for making the initial request
-	void StartL();
+	void Start();
 
-//private:
-protected: // ToDo: Make all private protected?
+protected:
 	// C++ constructor
 	CPositionRequestor(MPositionListener *aListener,
 			TTimeIntervalMicroSeconds aUpdateInterval,
 			TTimeIntervalMicroSeconds aUpdateTimeOut);
-	
-//private:
 
 	// Second-phase constructor
 	void ConstructL();
 
-//private:
-protected:
 	// From CActive
 	// Handle completion
-	void RunL(); // ToDo: Is L really needed?
+	void RunL();
 	
 private:
 	// How to cancel me
@@ -84,44 +83,41 @@ private:
 	// the active scheduler to panic.
 	//TInt RunError(TInt aError);
 
+	// Custom properties and methods
 public:
-	enum TPositionRequestorState
-		{
-		EStopped,				// Positioning is disabled
-		EPositionNotRecieved, /*Pending*/	// Position is not yet recieved
-		EPositionRecieved		// Position recieved
-		};
-
-
-public:
-	/*inline*/ TInt State() const;
-	/*inline*/ TBool IsRunning() const; // ToDo: Why "Undefined symbol" error when inline?
-	/*inline*/ TBool IsPositionRecieved() const;
-	TPositionInfo* LastKnownPositionInfo();
-	TPositionInfo* PrevLastKnownPositionInfo();
-	//void LastKnownPositionInfo(TPositionInfo &aPosInfo);
-	//void PrevLastKnownPositionInfo(TPositionInfo &aPosInfo);
+	inline TBool IsRunning() const
+		{ return iState != EStopped; };
 	
-private:
-	TInt /*(TODO: TPositionRequestorState ?)*/ iState; // State of the active object
+	inline TBool IsPositionRecieved() const
+		{ return iState == EPositionRecieved; };
 	
-	MPositionListener *iListener;
+	inline const TPositionInfo* LastKnownPositionInfo() const
+		{ return iLastPosInfo; };
 	
-	RPositionServer iPosServer;
+	inline const TPositionInfo* PrevLastKnownPositionInfo() const
+		{ return iPrevLastPosInfo; };
+	
 protected:
 	RPositioner iPositioner;
-	
-//protected:
+	TPositionUpdateOptions iUpdateOptions;
 	TPositionInfo* iLastPosInfo;
-	TPositionInfo* iPrevLastPosInfo;
+	TPositionInfo* iPrevLastPosInfo; // ToDo: Move from this class to GPSTrackerCLI
 	
 private:
+	enum TPositionRequestorState
+		{
+		EStopped = 0,			// Positioning is disabled
+		EPositionNotRecieved,	// Position is not yet recieved
+		EPositionRecieved		// Position recieved
+		};
 	
-	void SetState(TInt aState);
+	TPositionRequestorState iState; // State of the active object
+	MPositionListener *iListener;
+	RPositionServer iPosServer;
 	
-protected:
-	TPositionUpdateOptions iUpdateOptions;
-
+	void RequestPositionUpdate();
+	void SetState(TPositionRequestorState aState);
+	
 	};
 
 

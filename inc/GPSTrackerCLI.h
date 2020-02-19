@@ -79,9 +79,9 @@ public:
 	// Events
 	void OnPositionUpdated();
 	void OnPositionPartialUpdated();
-	void OnConnected();
-	void OnDisconnected();
-	void OnError(TInt aErrCode);
+	void OnPositionRestored();
+	void OnPositionLost();
+	void OnPositionError(TInt aErrCode);
 	void OnKeyPressed(TKeyCode aKeyCode);
 	void OnPauseTracking();
 	void OnResumeTracking();

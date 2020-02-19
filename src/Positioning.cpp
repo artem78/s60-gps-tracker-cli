@@ -9,17 +9,13 @@
  */
 
 #include "Positioning.h"
-#include "Logger.h"
 #include <lbssatellite.h>
 
 
 // CPositionRequestor
 
 //const TInt KGPSModuleID = 270526858;
-//const TInt KSecond = 1000000;
-//const TInt KDefaultPositionUpdateInterval = /* 5 * */ KSecond;
-//const TInt KDefaultPositionUpdateTimeOut = /*15 * KSecond*/ KPositionUpdateInterval * 5; // TODO: Set value in constructor
-const TInt KPositionMaxUpdateAge = 0;
+const TInt KPositionMaxUpdateAge = 0; // Disable reuse positions
 
 _LIT(KRequestorString, "MyRequestor"); // ToDo: Change
 
@@ -28,14 +24,22 @@ CPositionRequestor::CPositionRequestor(MPositionListener *aListener,
 		TTimeIntervalMicroSeconds aUpdateTimeOut) :
 	CActive(EPriorityStandard), // Standard priority
 	iState(EStopped),
-	iListener(aListener)//,
-	//iUpdateInterval(aUpdateInterval),
-	//iUpdateTimeOut(aUpdateTimeOut)
+	iListener(aListener)
 	{
-		iUpdateOptions.SetUpdateInterval(aUpdateInterval);
-		iUpdateOptions.SetUpdateTimeOut(aUpdateTimeOut);
-		iUpdateOptions.SetMaxUpdateAge(TTimeIntervalMicroSeconds(KPositionMaxUpdateAge));
-		iUpdateOptions.SetAcceptPartialUpdates(ETrue);
+	// Update position data every aUpdateInterval milliseconds
+	iUpdateOptions.SetUpdateInterval(aUpdateInterval);
+	
+	// Cancel position request if position is not obtained
+	// after aUpdateTimeOut milliseconds
+	iUpdateOptions.SetUpdateTimeOut(aUpdateTimeOut);
+	
+	// Positions which have time stamp below KPositionMaxUpdateAge seconds
+	// can be reused
+	iUpdateOptions.SetMaxUpdateAge(TTimeIntervalMicroSeconds(KPositionMaxUpdateAge));
+	
+	// Send incomplete position data if more info is not available.
+	// In this case data will be have valid only timestamp.
+	iUpdateOptions.SetAcceptPartialUpdates(ETrue);
 	}
 
 CPositionRequestor* CPositionRequestor::NewLC(MPositionListener *aPositionListener,
@@ -66,13 +70,14 @@ void CPositionRequestor::ConstructL()
 	User::LeaveIfError(iPosServer.Connect());
 	TPositionModuleId moduleId;
 	User::LeaveIfError(iPosServer.GetDefaultModuleId(moduleId));
+		// ToDo: Will be better to set GPS module instead default 
 	
-	
-	// Create specified position info object depending on the module capabilities
 	TPositionModuleInfo moduleInfo;
 	User::LeaveIfError(iPosServer.GetModuleInfoById(moduleId, moduleInfo));
 	TUint32 moduleInfoFamily = moduleInfo.ClassesSupported(EPositionInfoFamily);
 	
+	// Create position info object with specified type depending
+	// on the position module capabilities
 	if (moduleInfoFamily & EPositionSatelliteInfoClass)
 		{
 		LOG(_L8("Sattelite info supported"));
@@ -99,21 +104,11 @@ void CPositionRequestor::ConstructL()
 	
 	
 	// Preparing for start position recieving
-	//User::LeaveIfError(iTimer.CreateLocal()); // Initialize timer
-	
-	// 2. Create a subsession using the default positioning module
-	//TPositionModuleId moduleId = TPositionModuleId();
-	//moduleId.Uid(KGPSModuleID);
 	User::LeaveIfError(iPositioner.Open(iPosServer, moduleId));
-	//CleanupClosePushL(iPositioner);
-	
-	// 3. Set update options
-	// Set the options
 	User::LeaveIfError(iPositioner.SetUpdateOptions(iUpdateOptions));
-	
 	User::LeaveIfError(
 		iPositioner.SetRequestor(CRequestor::ERequestorService,
-			CRequestor::EFormatApplication, KRequestorString) // Todo: Why this needed?
+			CRequestor::EFormatApplication, KRequestorString)
 	);
 	
 	CActiveScheduler::Add(this); // Add to scheduler
@@ -122,57 +117,44 @@ void CPositionRequestor::ConstructL()
 CPositionRequestor::~CPositionRequestor()
 	{
 	Cancel(); // Cancel any request, if outstanding
-	//iTimer.Close(); // Destroy the RTimer object
-	// Delete instance variables if any
 	iPositioner.Close();
 	iPosServer.Close();
 	delete iPrevLastPosInfo;
 	delete iLastPosInfo;
-	LOG(_L8("Position requestor deleted"));
+	LOG(_L8("Position requestor destroyed"));
 	}
 
 void CPositionRequestor::DoCancel()
 	{
 	LOG(_L8("Position requestor cancelled"));
-	//iTimer.Cancel();
-	//iPositioner.
-	iPositioner.CancelRequest(/*EPositionerGetLastKnownPosition*/ EPositionerNotifyPositionUpdate);
-	//iPosServer.CancelRequest(EPositionerGetLastKnownPosition);
+	iPositioner.CancelRequest(EPositionerNotifyPositionUpdate);
+	//iPosServer.CancelRequest(EPositionerNotifyPositionUpdate);
+			// It seems that there is no need to call CancelRequest()
+			// for position server (returns KErrNotSupported)
 	
 	SetState(EStopped);
 	}
 
-void CPositionRequestor::StartL()
+void CPositionRequestor::Start()
 	{
-	LOG(_L8("Requestor started"));
+	LOG(_L8("Position requestor started"));
 	Cancel(); // Cancel any request, just to be sure
-	//iState = EPositionNotRecieved;
-	//iTimer.After(iStatus, aDelay); // Set for later
+	RequestPositionUpdate();
+	SetState(EPositionNotRecieved);
+	}
+
+void CPositionRequestor::RequestPositionUpdate()
+	{
 	iPositioner.NotifyPositionUpdate(*iLastPosInfo, iStatus);
 	SetActive(); // Tell scheduler a request is active
-	SetState(EPositionNotRecieved);
 	}
 
 void CPositionRequestor::RunL()
 	{
-	/*if (iState == EUninitialized)
+	switch (iStatus.Int())
 		{
-		// Do something the first time RunL() is called
-		iState = EInitialized;
-		}
-	else if (iState != EError)
-		{
-		// Do something
-		}*/
-	//iTimer.After(iStatus, 1000000); // Set for 1 sec later
-	
-	switch (iStatus.Int()) {
         // The fix is valid
         case KErrNone:
-        // The fix has only partially valid information.
-        // It is guaranteed to only have a valid timestamp
-        //case KPositionPartialUpdate:
-        // case KPositionQualityLoss: // TODO: Maybe uncomment
             {
             LOG(_L8("Position recieved"));
 
@@ -187,114 +169,50 @@ void CPositionRequestor::RunL()
             	}
 #endif
             
-            /*if (iState != EPositionRecieved) {
-				iState = EPositionRecieved;
-				iListener->onConnected();
-            }*/
             SetState(EPositionRecieved);
-            
-            
-            // Pre process the position information
-            //PositionUpdatedL();
             iListener->OnPositionUpdated();
-            
-			iPositioner.NotifyPositionUpdate(*iLastPosInfo, iStatus);
-			SetActive();
-			
+			RequestPositionUpdate();
 			*iPrevLastPosInfo = *iLastPosInfo;
-            
             break;
             }
-            
-        // The data class used was not supported
-        //case KErrArgument:
-        /*    {
-            break;
-            }*/
-            
-        // The position data could not be delivered
-        //case KPositionQualityLoss:
-        /*    {
-            break;
-            }*/
-            
-        // Access is denied
-        //case KErrAccessDenied:
-            /*{
-            break;
-            }*/
-            
-        // Request timed out
-        /*case KErrTimedOut:
-            {
-            break;
-            }*/
-            
-        // The request was canceled
-        /*case KErrCancel:
-            {
-            break;
-            }*/
-            
-        /*// There is no last known position
-        case KErrUnknown:*/
             
         // The fix has only partially valid information.
         // It is guaranteed to only have a valid timestamp
         case KPositionPartialUpdate:
         	{
-        	LOG(_L8("Postion partial update"));
-        	
+        	LOG(_L8("Partial position recieved"));
         	SetState(EPositionNotRecieved);
-        	
             iListener->OnPositionPartialUpdated();
-            
-			iPositioner.NotifyPositionUpdate(*iLastPosInfo, iStatus);
-			SetActive();
-			
-			//*iPrevLastPosInfo = *iLastPosInfo; // ???
-        	
+			RequestPositionUpdate();
         	break;
         	}
             
+        // Position not recieved after specified time
         case KErrTimedOut:
             {
-            LOG(_L8("Positioning request is timed out"));
-            
-            /*if (iState != EPositionNotRecieved) {
-				iState = EPositionNotRecieved;
-				iListener->onDisConnected();
-            }*/
+            LOG(_L8("Positioning request timed out"));
             SetState(EPositionNotRecieved);
-            
-			iPositioner.NotifyPositionUpdate(*iLastPosInfo, iStatus);
-			SetActive();
-			
+			RequestPositionUpdate();
             break;
             }
-            
+           
+        // Positioning has been stopped
         case KErrCancel:
         	{
         	LOG(_L8("Positioning request cancelled"));
-        	
-        	//setState(EStopped); // Not needed - State already changed in DoCancel
+        	//setState(EStopped); // Not needed - State already has changed in DoCancel
         	break;
         	}
             
-        // Unrecoverable errors.
+        // Any other errors
         default:
             {
-            LOG(_L8("Error in RunL: %d"), iStatus.Int());
-            
+            LOG(_L8("Positioning request failed, status: %d"), iStatus.Int());
             SetState(EStopped);
-            
-            iListener->OnError(iStatus.Int());
-
+            iListener->OnPositionError(iStatus.Int());
             break;
             }
-	}
-	
-	//SetActive(); // Tell scheduler a request is active
+		}
 	}
 
 /*TInt CPositionRequestor::RunError(TInt aError)
@@ -302,59 +220,21 @@ void CPositionRequestor::RunL()
 	//return KErrNone;
 	return aError;
 	}*/
-	
-/*inline*/ TInt CPositionRequestor::State() const
-	{
-	return iState;
-	}
 
-void CPositionRequestor::SetState(TInt aState)
+void CPositionRequestor::SetState(TPositionRequestorState aState)
 	{
 	TInt oldState = iState;
 	iState = aState;
 	
-	if (oldState != aState) {
-		if (aState == EPositionRecieved) {
-			iListener->OnConnected();
-		} else if (oldState == EPositionRecieved ||
-				oldState == EStopped && aState == EPositionNotRecieved) {
-			iListener->OnDisconnected();
+	if (oldState != aState)
+		{
+		if (aState == EPositionRecieved)
+			iListener->OnPositionRestored();
+		else if (oldState == EPositionRecieved ||
+				oldState == EStopped && aState == EPositionNotRecieved)
+			iListener->OnPositionLost();
 		}
 	}
-	}
-
-/*inline*/ TBool CPositionRequestor::IsRunning() const
-	{
-	return iState != EStopped;
-	}
-
-/*inline*/ TBool CPositionRequestor::IsPositionRecieved() const
-	{
-	return iState == CPositionRequestor::EPositionRecieved;
-	}
-
-TPositionInfo* CPositionRequestor::LastKnownPositionInfo()
-	{
-	// ToDo: Make read only
-	return iLastPosInfo;
-	}
-
-TPositionInfo* CPositionRequestor::PrevLastKnownPositionInfo()
-	{
-	// ToDo: Make read only
-	return iPrevLastPosInfo;
-	}
-
-/*void CPositionRequestor::LastKnownPositionInfo(TPositionInfo &aPosInfo)
-	{
-	aPosInfo = *iLastPosInfo;
-	}*/
-
-/*void CPositionRequestor::PrevLastKnownPositionInfo(TPositionInfo &aPosInfo)
-	{
-	aPosInfo = *iPrevLastPosInfo;
-	}*/
-
 
 
 // CDynamicPositionRequestor

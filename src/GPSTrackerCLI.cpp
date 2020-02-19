@@ -17,8 +17,6 @@
 #include "Logger.h"
 #include <lbspositioninfo.h>
 #include "LBSSatelliteExtended.h"
-#include "Positioning.h"
-#include "TrackWriter.h"
 
 
 #ifdef _DEBUG
@@ -102,7 +100,7 @@ void CGPSTrackerCLI::ConstructL()
 	iKeyCatcher->Start();
 	
 	iPosRequestor = CDynamicPositionRequestor::NewL(this);
-	iPosRequestor->StartL();
+	iPosRequestor->Start();
 	}
 
 TInt CGPSTrackerCLI::MakeDir(const TDesC &aDir)
@@ -236,7 +234,7 @@ void CGPSTrackerCLI::ShowDataL()
 	const TReal KMetersInKilometer = 1000.0;
 	
 	
-	TPositionInfo* posInfo = iPosRequestor->LastKnownPositionInfo(); 
+	const TPositionInfo* posInfo = iPosRequestor->LastKnownPositionInfo(); 
 	TPosition pos;
 	posInfo->GetPosition(pos);
 	
@@ -258,7 +256,7 @@ void CGPSTrackerCLI::ShowDataL()
 	
 	// Latitude
 	buff.AppendJustify(KTextLat, KLabelMaxWidth, ERight, KSpace);
-	if (iPosRequestor->State() == CPositionRequestor::EPositionRecieved)
+	if (iPosRequestor->IsPositionRecieved())
 		{
 		buff.AppendNum(pos.Latitude(), longRealFmt);
 		buff.Append(KDegree);
@@ -317,7 +315,7 @@ void CGPSTrackerCLI::ShowDataL()
 	// Course info
 	if (posInfo->PositionClassType() & EPositionCourseInfoClass)
 		{
-		TPositionCourseInfo* courseInfo = static_cast<TPositionCourseInfo*>(posInfo);
+		const TPositionCourseInfo* courseInfo = static_cast<const TPositionCourseInfo*>(posInfo);
 		TCourse course;
 		courseInfo->GetCourse(course);
 		
@@ -369,7 +367,7 @@ void CGPSTrackerCLI::ShowDataL()
 	// Sattelite info
 	if (posInfo->PositionClassType() & EPositionSatelliteInfoClass)
 		{
-		TPositionSatelliteInfoExtended* satelliteInfo = static_cast<TPositionSatelliteInfoExtended*>(posInfo);
+		const TPositionSatelliteInfoExtended* satelliteInfo = static_cast<const TPositionSatelliteInfoExtended*>(posInfo);
 		
 		// Satellites count
 		buff.AppendJustify(KTextSatellites, KLabelMaxWidth, ERight, KSpace);
@@ -490,15 +488,15 @@ void CGPSTrackerCLI::/*Get*/ProgramDataDir(TDes &aDir)
 	aDir.Append(KProgramDataDirWithoutDrive);
 	}
 
-void CGPSTrackerCLI::OnConnected()
+void CGPSTrackerCLI::OnPositionRestored()
 	{
-	LOG(_L8("Connected"));
+	LOG(_L8("Position recieved"));
 	iIsAfterConnectionRestored = ETrue;
 	}
 
-void CGPSTrackerCLI::OnDisconnected()
+void CGPSTrackerCLI::OnPositionLost()
 	{
-	LOG(_L8("Disconnected"));
+	LOG(_L8("Position lost"));
 	TRAP_IGNORE(ShowDataL());
 	
 	TRAPD(r, iTrackWriter->StartNewSegmentL());
@@ -511,11 +509,11 @@ void CGPSTrackerCLI::OnDisconnected()
 
 void CGPSTrackerCLI::OnPositionUpdated()
 	{
-	TPositionInfo* posInfo = iPosRequestor->LastKnownPositionInfo();
+	const TPositionInfo* posInfo = iPosRequestor->LastKnownPositionInfo();
 	TPosition pos;
 	posInfo->GetPosition(pos);
 	
-	TPositionInfo* prevPosInfo = iPosRequestor->PrevLastKnownPositionInfo();
+	const TPositionInfo* prevPosInfo = iPosRequestor->PrevLastKnownPositionInfo();
 	TPosition prevPos;
 	prevPosInfo->GetPosition(prevPos);
 	
@@ -549,7 +547,7 @@ void CGPSTrackerCLI::OnPositionPartialUpdated()
 	TRAP_IGNORE(ShowDataL());
 	}
 
-void CGPSTrackerCLI::OnError(TInt aErrCode)
+void CGPSTrackerCLI::OnPositionError(TInt aErrCode)
 	{
 	Shutdown(aErrCode);
 	}
@@ -573,9 +571,7 @@ void CGPSTrackerCLI::OnKeyPressed(TKeyCode aKeyCode)
 				}
 			else
 				{
-				TRAP_IGNORE(
-						iPosRequestor->StartL();
-				);
+				iPosRequestor->Start();
 				OnResumeTracking();
 				}
 			break;
