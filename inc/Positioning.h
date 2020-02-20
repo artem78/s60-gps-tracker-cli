@@ -121,21 +121,16 @@ private:
 	};
 
 
-
-/*const TUint KMaxSpeedCalculationPeriod = 60;
-const TUint KDistanceBetweenPoints = 30;
-const TUint KPositionMinUpdateInterval = 1;
-const TUint KPositionMaxUpdateInterval = 30;*/
-
 // Forward declaration
 class CPointsCache;
 
 /*
- * Automaticaly set position update interval depending on current speed
+ * Automatically set position update interval depending on current speed
  * to preserve approximately equal distance between points 
  */
-class CDynamicPositionRequestor: public CPositionRequestor
+class CDynamicPositionRequestor : public CPositionRequestor
 	{
+	// Override parent class methods
 public:
 	~CDynamicPositionRequestor();
 	
@@ -144,7 +139,8 @@ public:
 	// Two-phased constructor.
 	static CDynamicPositionRequestor* NewLC(MPositionListener *aListener);
 	
-	/*inline*/ TTimeIntervalMicroSeconds UpdateInterval();
+	inline TTimeIntervalMicroSeconds UpdateInterval()
+		{ return iUpdateOptions.UpdateInterval(); };
 	
 private:
 	// C++ constructor
@@ -155,11 +151,10 @@ private:
 	
 	// From CActive
 	// Handle completion
-	void RunL(); // ToDo: Is L really needed?
+	void RunL();
 
-	//TReal32 GetMaxSpeedByPeriod(); // Complex getter
-	//TReal32 MaxSpeedDuringPeriod();
-	
+	// New methods and properties
+private:	
 	CPointsCache* iPointsCache;
 	
 	};
@@ -167,26 +162,32 @@ private:
 /*
  * Stores positions for the last period and return max speed
  */
-class CPointsCache: public CBase // ToDo: Optimize
+class CPointsCache : public CBase
 	{
 public:
 	CPointsCache(TTimeIntervalMicroSeconds aPeriod);
 	~CPointsCache();
 	
 	void AddPoint(const TPosition &aPos);
-	//TReal32 GetMaxSpeed();
 	
 	/* Get max speed from saved points.
-	 * Return KErrNone if there`s no error and error code
-	 * when there are not enouth points to calculate speed (less then 2). 
-	 * @return a Symbian OS error code.
+	 * @return KErrNone if there`s no error and KErrGeneral
+	 * when there are not enouth points to calculate speed (less then 2).
+	 * @panic CPointsCache 1 If speed calculation has been failed.
 	 */
-	TInt GetMaxSpeed(TReal32 &aSpeed);
+	TInt GetMaxSpeed(TReal32 &aMaxSpeed);
+	
 private:
+	enum TPanic
+		{
+		ESpeedCalculationFailed = 1,
+		};
+	
 	TTimeIntervalMicroSeconds iPeriod;
 	RArray<TPosition> iPoints; // ToDo: What about CCirBuf?
-		// ToDo: Set granylarity
+		// ToDo: Set granularity
 	
+	void Panic(TPanic aPanic);
 	void ClearOldPoints();
 	};
 

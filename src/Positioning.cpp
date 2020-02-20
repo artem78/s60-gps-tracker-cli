@@ -240,7 +240,6 @@ void CPositionRequestor::SetState(TPositionRequestorState aState)
 // CDynamicPositionRequestor
 
 const TUint KMaxSpeedCalculationPeriod	= KSecond * 60;
-//const TUint KPointsCachePeriod			= KSecond * 60;
 const TReal KDistanceBetweenPoints		= 30.0;
 const TUint KPositionMinUpdateInterval	= KSecond * 1;
 const TUint KPositionMaxUpdateInterval	= KSecond * /*30*/ 10;
@@ -248,13 +247,12 @@ const TUint KPositionMaxUpdateInterval	= KSecond * /*30*/ 10;
 CDynamicPositionRequestor::CDynamicPositionRequestor(MPositionListener *aListener) :
 	CPositionRequestor(aListener, KPositionMinUpdateInterval, KPositionMinUpdateInterval + KSecond)
 	{
+	// No implementation required
 	}
 
 CDynamicPositionRequestor::~CDynamicPositionRequestor()
 	{
 	delete iPointsCache;
-	
-	// ToDo: Run parent destructor needed?
 	}
 
 CDynamicPositionRequestor* CDynamicPositionRequestor::NewLC(MPositionListener *aPositionListener)
@@ -272,22 +270,12 @@ CDynamicPositionRequestor* CDynamicPositionRequestor::NewL(MPositionListener *aP
 	return self;
 	}
 
-TTimeIntervalMicroSeconds CDynamicPositionRequestor::UpdateInterval()
-	{
-	return iUpdateOptions.UpdateInterval();
-	}
-
 void CDynamicPositionRequestor::ConstructL()
 	{
 	iPointsCache = new (ELeave) CPointsCache(KMaxSpeedCalculationPeriod);
 	
-	CPositionRequestor::ConstructL(); // Run initialization in parent class
+	CPositionRequestor::ConstructL(); // Run initialization of parent class
 	}
-
-/*TReal32 CDynamicPositionRequestor::MaxSpeedDuringPeriod()
-	{
-	
-	}*/
 
 void CDynamicPositionRequestor::RunL()
 	{
@@ -295,23 +283,15 @@ void CDynamicPositionRequestor::RunL()
 		{
 		// The fix is valid
 		case KErrNone:
-		//case KPositionQualityLoss:
 			{
 			TPosition pos;
 			iLastPosInfo->GetPosition(pos);
-			//Logger::WriteEmptyLine();
-			/*TBuf<20> timeBuff1;
-			pos.Time().FormatL(timeBuff1, KLogTimeFormat);
-			TBuf8<20> timeBuff8_1;
-			timeBuff8_1.Copy(timeBuff1);*/
-			//LOG(_L8("Current position: lat=%f lon=%f alt=%f time=%S"),
-			//		pos.Latitude(), pos.Longitude(), pos.Altitude(), &timeBuff8_1);
+
 			LOG(_L8("Current position: lat=%f lon=%f alt=%f"),
 					pos.Latitude(), pos.Longitude(), pos.Altitude());
 			
 			iPointsCache->AddPoint(pos);
 			
-			//TReal32 speed = iPointsCache->MaxSpeed();
 			TReal32 speed;
 			TTimeIntervalMicroSeconds updateInterval;
 			if (iPointsCache->GetMaxSpeed(speed) != KErrNone)
@@ -331,7 +311,7 @@ void CDynamicPositionRequestor::RunL()
 						LOG(_L8("Time Round error"));
 					User::LeaveIfError(err);
 
-					updateInterval = TTimeIntervalMicroSeconds(time * KSecond);
+					updateInterval = TTimeIntervalMicroSeconds(TInt64(time * KSecond));
 					// Use range restrictions
 					updateInterval = Min(
 							Max(updateInterval, KPositionMinUpdateInterval),
@@ -357,9 +337,8 @@ void CDynamicPositionRequestor::RunL()
 			}
 		}
 	
-	CPositionRequestor::RunL();
+	CPositionRequestor::RunL(); // Run method from base class
 	}
-
 
 
 // CPointsCache
@@ -375,6 +354,12 @@ CPointsCache::~CPointsCache()
 	iPoints.Close();
 	}
 
+void CPointsCache::Panic(TPanic aPanic)
+	{
+	_LIT(KPanicCategory, "CPointsCache");
+	User::Panic(KPanicCategory, aPanic);
+	}
+
 void CPointsCache::AddPoint(const TPosition &aPos)
 	{
 	ClearOldPoints();
@@ -383,38 +368,40 @@ void CPointsCache::AddPoint(const TPosition &aPos)
 	iPoints.Append(aPos);
 	}
 	
-//TReal32 CPointsCache::GetMaxSpeed()
-TInt CPointsCache::GetMaxSpeed(TReal32 &aSpeed) 
+TInt CPointsCache::GetMaxSpeed(TReal32 &aMaxSpeed) 
 	{
+	// ToDo: Optimize
+	
 	ClearOldPoints();
 	
-	TUint count = iPoints.Count();
+	TInt count = iPoints.Count();
 	
 	if (count < 2)
 		{
 		LOG(_L8("Can`t calculate max speed - not enough points in cache (%d)!"), count);
 		return KErrGeneral; // Can`t calculate speed
-			// ToDo: Use any specific error code
 		}
 	
-	//TReal32 maxSpeed = 0;
-	aSpeed = 0;
+	aMaxSpeed = 0;
 	TReal32 speed;
-	for (/*TUint*/ TInt i = /*0*/1; i < count; i++)
+	for (TInt i = 1; i < count; i++)
 		{
-		//maxSpeed = Max(maxSpeed, iPoints[i].Speed()));
-		iPoints[i].Speed(iPoints[i - 1], speed); // ToDo: What about handling errors?
-		aSpeed = Max(speed, aSpeed);
+		TInt r = iPoints[i].Speed(iPoints[i - 1], speed);
+		__ASSERT_DEBUG(r == KErrNone, Panic(ESpeedCalculationFailed));
+		aMaxSpeed = Max(speed, aMaxSpeed);
 		}
 	
-	//return maxSpeed;
-	LOG(_L8("Max speed: %.1f m/s (total cached points: %d)"), aSpeed, count);
+	LOG(_L8("Max speed: %.1f m/s (total cached points: %d)"), aMaxSpeed, count);
 	return KErrNone;
 	}
 
 void CPointsCache::ClearOldPoints()
 	{
-	if (iPoints.Count() == 0)
+	// ToDo: Optimize
+	
+	TInt count = iPoints.Count();
+	
+	if (!count)
 		return;
 	
 	TTime time;
@@ -424,7 +411,7 @@ void CPointsCache::ClearOldPoints()
 #ifdef __WINS__
 	TUint deletedCount = 0;
 #endif
-	for (/*TUint*/ TInt i = iPoints.Count() - 1; i >= 0; i--) // Bypass from the end
+	for (TInt i = count - 1; i >= 0; i--) // Bypass from the oldest items at the end of array
 		{
 		if (iPoints[i].Time() < time)
 			{
