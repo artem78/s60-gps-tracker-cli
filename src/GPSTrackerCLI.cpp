@@ -204,7 +204,7 @@ void CGPSTrackerCLI::ShowDataL()
 	//_LIT(KTextTime,			"Time: ");
 	_LIT(KTextPhoneTime,		"Phone time: ");
 	_LIT(KTextSpeed,			"Speed: ");
-	_LIT(KTextCourse,			"Course: ");
+	//_LIT(KTextCourse,			"Course: ");
 	_LIT(KTextHeading,			"Heading: ");
 	_LIT(KTextSatellites,		"Satellites: ");
 	_LIT(KTextSatelliteTime,	"GPS time: ");
@@ -484,7 +484,7 @@ void CGPSTrackerCLI::/*Get*/ProgramDataDir(TDes &aDir)
 	TParse parser;
 	parser.Set(procPath, NULL, NULL);
 	aDir.Append(parser.Drive());
-#endif;
+#endif
 	aDir.Append(KProgramDataDirWithoutDrive);
 	}
 
