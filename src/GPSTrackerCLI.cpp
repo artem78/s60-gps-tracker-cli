@@ -99,7 +99,7 @@ void CGPSTrackerCLI::ConstructL()
 	iKeyCatcher = CKeyCatcher::NewL(iConsole, this);
 	iKeyCatcher->Start();
 	
-	iPosRequestor = CDynamicPositionRequestor::NewL(this);
+	iPosRequestor = CDynamicPositionRequestor::NewL(this, KProgramName);
 	iPosRequestor->Start();
 	}
 

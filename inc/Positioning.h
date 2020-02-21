@@ -49,11 +49,13 @@ public:
 
 	// Two-phased constructor.
 	static CPositionRequestor* NewL(MPositionListener *aListener,
+			const TDesC &aRequestorName,
 			TTimeIntervalMicroSeconds aUpdateInterval = TTimeIntervalMicroSeconds(KDefaultPositionUpdateInterval),
 			TTimeIntervalMicroSeconds aUpdateTimeOut = TTimeIntervalMicroSeconds(KDefaultPositionUpdateTimeOut));
 
 	// Two-phased constructor.
 	static CPositionRequestor* NewLC(MPositionListener *aListener,
+			const TDesC &aRequestorName,
 			TTimeIntervalMicroSeconds aUpdateInterval = TTimeIntervalMicroSeconds(KDefaultPositionUpdateInterval),
 			TTimeIntervalMicroSeconds aUpdateTimeOut = TTimeIntervalMicroSeconds(KDefaultPositionUpdateTimeOut));
 
@@ -69,7 +71,7 @@ protected:
 			TTimeIntervalMicroSeconds aUpdateTimeOut);
 
 	// Second-phase constructor
-	void ConstructL();
+	void ConstructL(const TDesC &aRequestorName);
 
 	// From CActive
 	// Handle completion
@@ -134,10 +136,12 @@ class CDynamicPositionRequestor : public CPositionRequestor
 public:
 	~CDynamicPositionRequestor();
 	
-	static CDynamicPositionRequestor* NewL(MPositionListener *aListener);
+	static CDynamicPositionRequestor* NewL(MPositionListener *aListener,
+			const TDesC &aRequestorName);
 
 	// Two-phased constructor.
-	static CDynamicPositionRequestor* NewLC(MPositionListener *aListener);
+	static CDynamicPositionRequestor* NewLC(MPositionListener *aListener,
+			const TDesC &aRequestorName);
 	
 	inline TTimeIntervalMicroSeconds UpdateInterval()
 		{ return iUpdateOptions.UpdateInterval(); };
@@ -147,7 +151,7 @@ private:
 	CDynamicPositionRequestor(MPositionListener *aListener);
 	
 	// Second-phase constructor
-	void ConstructL();
+	void ConstructL(const TDesC &aRequestorName);
 	
 	// From CActive
 	// Handle completion

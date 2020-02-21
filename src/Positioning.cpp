@@ -17,7 +17,6 @@
 //const TInt KGPSModuleID = 270526858;
 const TInt KPositionMaxUpdateAge = 0; // Disable reuse positions
 
-_LIT(KRequestorString, "MyRequestor"); // ToDo: Change
 
 CPositionRequestor::CPositionRequestor(MPositionListener *aListener,
 		TTimeIntervalMicroSeconds aUpdateInterval,
@@ -43,27 +42,29 @@ CPositionRequestor::CPositionRequestor(MPositionListener *aListener,
 	}
 
 CPositionRequestor* CPositionRequestor::NewLC(MPositionListener *aPositionListener,
+		const TDesC &aRequestorName,
 		TTimeIntervalMicroSeconds aUpdateInterval,
 		TTimeIntervalMicroSeconds aUpdateTimeOut)
 	{
 	CPositionRequestor* self = new (ELeave) CPositionRequestor(aPositionListener,
 			aUpdateInterval, aUpdateTimeOut);
 	CleanupStack::PushL(self);
-	self->ConstructL();
+	self->ConstructL(aRequestorName);
 	return self;
 	}
 
 CPositionRequestor* CPositionRequestor::NewL(MPositionListener *aPositionListener,
+		const TDesC &aRequestorName,
 		TTimeIntervalMicroSeconds aUpdateInterval,
 		TTimeIntervalMicroSeconds aUpdateTimeOut)
 	{
 	CPositionRequestor* self = CPositionRequestor::NewLC(aPositionListener,
-			aUpdateInterval, aUpdateTimeOut);
+			aRequestorName, aUpdateInterval, aUpdateTimeOut);
 	CleanupStack::Pop(); // self;
 	return self;
 	}
 
-void CPositionRequestor::ConstructL()
+void CPositionRequestor::ConstructL(const TDesC &aRequestorName)
 	{
 	LOG(_L8("Position requestor created"));
 	
@@ -108,7 +109,7 @@ void CPositionRequestor::ConstructL()
 	User::LeaveIfError(iPositioner.SetUpdateOptions(iUpdateOptions));
 	User::LeaveIfError(
 		iPositioner.SetRequestor(CRequestor::ERequestorService,
-			CRequestor::EFormatApplication, KRequestorString)
+			CRequestor::EFormatApplication, aRequestorName)
 	);
 	
 	CActiveScheduler::Add(this); // Add to scheduler
@@ -255,26 +256,29 @@ CDynamicPositionRequestor::~CDynamicPositionRequestor()
 	delete iPointsCache;
 	}
 
-CDynamicPositionRequestor* CDynamicPositionRequestor::NewLC(MPositionListener *aPositionListener)
+CDynamicPositionRequestor* CDynamicPositionRequestor::NewLC(MPositionListener *aPositionListener,
+		const TDesC &aRequestorName)
 	{
 	CDynamicPositionRequestor* self = new (ELeave) CDynamicPositionRequestor(aPositionListener);
 	CleanupStack::PushL(self);
-	self->ConstructL();
+	self->ConstructL(aRequestorName);
 	return self;
 	}
 
-CDynamicPositionRequestor* CDynamicPositionRequestor::NewL(MPositionListener *aPositionListener)
+CDynamicPositionRequestor* CDynamicPositionRequestor::NewL(MPositionListener *aPositionListener,
+		const TDesC &aRequestorName)
 	{
-	CDynamicPositionRequestor* self = CDynamicPositionRequestor::NewLC(aPositionListener);
+	CDynamicPositionRequestor* self = CDynamicPositionRequestor::NewLC(aPositionListener,
+			aRequestorName);
 	CleanupStack::Pop(); // self;
 	return self;
 	}
 
-void CDynamicPositionRequestor::ConstructL()
+void CDynamicPositionRequestor::ConstructL(const TDesC &aRequestorName)
 	{
 	iPointsCache = new (ELeave) CPointsCache(KMaxSpeedCalculationPeriod);
 	
-	CPositionRequestor::ConstructL(); // Run initialization of parent class
+	CPositionRequestor::ConstructL(aRequestorName); // Run initialization of parent class
 	}
 
 void CDynamicPositionRequestor::RunL()
