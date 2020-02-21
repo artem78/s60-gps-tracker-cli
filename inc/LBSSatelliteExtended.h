@@ -26,14 +26,14 @@
 class TPositionSatelliteInfoExtended : public TPositionSatelliteInfo
 	{
 public:
-    /**
-     * @return Position dilution of precision or NaN
-     */
+	/**
+	 * @return Position dilution of precision or NaN
+	 */
 	TReal PositionDoP() const;
 	
-    /**
-     * @return Geometric dilution of precision or NaN
-     */
+	/**
+	 * @return Geometric dilution of precision or NaN
+	 */
 	TReal GeometricDoP() const;
 	};
 

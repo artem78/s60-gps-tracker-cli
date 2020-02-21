@@ -154,65 +154,65 @@ void CPositionRequestor::RunL()
 	{
 	switch (iStatus.Int())
 		{
-        // The fix is valid
-        case KErrNone:
-            {
-            LOG(_L8("Position recieved"));
+		// The fix is valid
+		case KErrNone:
+			{
+			LOG(_L8("Position recieved"));
 
 #ifdef __WINS__
-            // On emulator time dilution of precision is NaN.
-            // So set it to any plausible value.
-            if (iLastPosInfo->PositionClassType() & EPositionSatelliteInfoClass)
-            	{
-            	TPositionSatelliteInfo* satteliteInfo = static_cast<TPositionSatelliteInfo*>(iLastPosInfo);
-            	if (Math::IsNaN(satteliteInfo->TimeDoP()))
-            		satteliteInfo->SetTimeDoP(1.5);
-            	}
+			// On emulator time dilution of precision is NaN.
+			// So set it to any plausible value.
+			if (iLastPosInfo->PositionClassType() & EPositionSatelliteInfoClass)
+				{
+				TPositionSatelliteInfo* satteliteInfo = static_cast<TPositionSatelliteInfo*>(iLastPosInfo);
+				if (Math::IsNaN(satteliteInfo->TimeDoP()))
+					satteliteInfo->SetTimeDoP(1.5);
+				}
 #endif
-            
-            SetState(EPositionRecieved);
-            iListener->OnPositionUpdated();
+			
+			SetState(EPositionRecieved);
+			iListener->OnPositionUpdated();
 			RequestPositionUpdate();
 			*iPrevLastPosInfo = *iLastPosInfo;
-            break;
-            }
-            
-        // The fix has only partially valid information.
-        // It is guaranteed to only have a valid timestamp
-        case KPositionPartialUpdate:
-        	{
-        	LOG(_L8("Partial position recieved"));
-        	SetState(EPositionNotRecieved);
-            iListener->OnPositionPartialUpdated();
+			break;
+			}
+			
+		// The fix has only partially valid information.
+		// It is guaranteed to only have a valid timestamp
+		case KPositionPartialUpdate:
+			{
+			LOG(_L8("Partial position recieved"));
+			SetState(EPositionNotRecieved);
+			iListener->OnPositionPartialUpdated();
 			RequestPositionUpdate();
-        	break;
-        	}
-            
-        // Position not recieved after specified time
-        case KErrTimedOut:
-            {
-            LOG(_L8("Positioning request timed out"));
-            SetState(EPositionNotRecieved);
+			break;
+			}
+			
+		// Position not recieved after specified time
+		case KErrTimedOut:
+			{
+			LOG(_L8("Positioning request timed out"));
+			SetState(EPositionNotRecieved);
 			RequestPositionUpdate();
-            break;
-            }
-           
-        // Positioning has been stopped
-        case KErrCancel:
-        	{
-        	LOG(_L8("Positioning request cancelled"));
-        	//setState(EStopped); // Not needed - State already has changed in DoCancel
-        	break;
-        	}
-            
-        // Any other errors
-        default:
-            {
-            LOG(_L8("Positioning request failed, status: %d"), iStatus.Int());
-            SetState(EStopped);
-            iListener->OnPositionError(iStatus.Int());
-            break;
-            }
+			break;
+			}
+			
+		// Positioning has been stopped
+		case KErrCancel:
+			{
+			LOG(_L8("Positioning request cancelled"));
+			//setState(EStopped); // Not needed - State already has changed in DoCancel
+			break;
+			}
+			
+		// Any other errors
+		default:
+			{
+			LOG(_L8("Positioning request failed, status: %d"), iStatus.Int());
+			SetState(EStopped);
+			iListener->OnPositionError(iStatus.Int());
+			break;
+			}
 		}
 	}
 
