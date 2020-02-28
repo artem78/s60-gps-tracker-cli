@@ -211,9 +211,6 @@ void CGPSTrackerCLI::ShowDataL()
 
 	_LIT(KMetersUnit, "m");
 	_LIT(KKilometersUnit, "km");
-	#ifdef _DEBUG
-	_LIT(KMetersPerSecondsUnit, "m/s");
-	#endif
 	_LIT(KKilometersPerHourUnit, "km/h");
 	_LIT(KSecondsUnit, "s");
 	const TChar KDegree = TChar(0xB0);
@@ -319,14 +316,6 @@ void CGPSTrackerCLI::ShowDataL()
 			buff.AppendNum(course.Speed() * KSpeedRatio, shortRealFmt);
 			buff.Append(KSpace);
 			buff.Append(KKilometersPerHourUnit);
-#ifdef _DEBUG
-			buff.Append(KSpace);
-			buff.Append(TChar(0x28));
-			buff.AppendNum(course.Speed(), longRealFmt);
-			buff.Append(KSpace);
-			buff.Append(KMetersPerSecondsUnit);
-			buff.Append(TChar(0x29));
-#endif
 			}
 		else
 			buff.Append(KTextNoValue);
