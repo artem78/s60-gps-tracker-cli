@@ -5,7 +5,9 @@
  *      Author: user
  *      Description: Simple module for writing log to file. Do not call class methods
  *      directly, use macroses instead. Before using it`s need to set output file by
- *      LOG_CONFIGURE macros. Log writes in debug builds only.
+ *      LOG_CONFIGURE macros. For enable logging you need to define constant:
+ *      	#define LOGGING_ENABLED 1
+ *		
  */
 
 #ifndef LOGGER_H_
@@ -15,18 +17,12 @@
 #include <e32std.h>
 #include <e32base.h>
 #include <f32file.h>
+#include "LoggingDefs.h"
 
 
-/*// Check that ENABLE_LOGGING is defined
+// Check that ENABLE_LOGGING is defined
 #ifndef LOGGING_ENABLED
-#warning LOGGING_ENABLED not defined!
-#define LOGGING_ENABLED 0
-#endif*/
-
-// Enable logging only in Debug-builds
-#ifdef _DEBUG
-#define LOGGING_ENABLED 1
-#else
+#warning LOGGING_ENABLED not defined! Set it to 0.
 #define LOGGING_ENABLED 0
 #endif
 

@@ -19,13 +19,6 @@
 #include "LBSSatelliteExtended.h"
 
 
-#ifdef _DEBUG
-#define LOGGING_ENABLED 1
-#else
-#define LOGGING_ENABLED 0
-#endif
-
-
 //  Constants
 
 _LIT(KProgramName, "GPS Tracker CLI");

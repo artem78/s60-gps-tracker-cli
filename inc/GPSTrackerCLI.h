@@ -15,6 +15,7 @@
 #include <e32base.h>
 #include <e32cons.h>
 
+#include <LoggingDefs.h>
 #include "Positioning.h"
 #include "TrackWriter.h"
 #include "KeyCatcher.h"

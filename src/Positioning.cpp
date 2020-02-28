@@ -9,6 +9,7 @@
  */
 
 #include "Positioning.h"
+#include "LoggingDefs.h"
 #include <lbssatellite.h>
 
 
@@ -412,7 +413,7 @@ void CPointsCache::ClearOldPoints()
 	time.UniversalTime();
 	time -= iPeriod;
 	
-#ifdef __WINS__
+#ifdef LOGGING_ENABLED
 	TUint deletedCount = 0;
 #endif
 	for (TInt i = count - 1; i >= 0; i--) // Bypass from the oldest items at the end of array
@@ -420,13 +421,13 @@ void CPointsCache::ClearOldPoints()
 		if (iPoints[i].Time() < time)
 			{
 			iPoints.Remove(i);
-#ifdef __WINS__
+#ifdef LOGGING_ENABLED
 			deletedCount++;
 #endif
 			}
 		}
 	
-#ifdef __WINS__
+#ifdef LOGGING_ENABLED
 	if (deletedCount)
 		LOG(_L8("Deleted %d outdated points"), deletedCount);
 #endif
