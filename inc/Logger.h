@@ -29,6 +29,7 @@
 
 // ToDo: Write to log additinal info: __FILE__, __LINE__, etc...
 // ToDo: Add levels (debug, error, info, warning, etc...)
+// ToDo: Write 16bit descriptors
 
 #if LOGGING_ENABLED
 #define LOG_CONFIGURE(aFile) Logger::Configure(aFile)
