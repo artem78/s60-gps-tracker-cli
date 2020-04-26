@@ -1,5 +1,7 @@
 [По-русски](README-ru.md)
 
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/artem78/s60-gps-tracker-cli?style=plastic)&nbsp;&nbsp;&nbsp;[![GitHub issues](https://img.shields.io/github/issues/artem78/s60-gps-tracker-cli?style=plastic)](https://github.com/artem78/s60-gps-tracker-cli/issues)&nbsp;&nbsp;&nbsp;[![GitHub license](https://img.shields.io/github/license/artem78/s60-gps-tracker-cli?style=plastic)](https://github.com/artem78/s60-gps-tracker-cli/blob/master/LICENSE.txt)&nbsp;&nbsp;&nbsp;![GitHub All Releases](https://img.shields.io/github/downloads/artem78/s60-gps-tracker-cli/total?style=plastic)&nbsp;&nbsp;&nbsp;![GitHub last commit](https://img.shields.io/github/last-commit/artem78/s60-gps-tracker-cli?style=plastic)
+
 # GPS track recorder for Symbian S60 (console version)
 Writes your way to file. Works on Nokia phones with S60 3rd and 5th editions.
 
