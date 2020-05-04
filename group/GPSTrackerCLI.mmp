@@ -11,7 +11,7 @@ TARGET		  GPSTrackerCLI.exe
 TARGETTYPE	  exe
 UID			 0 0xEB199A9B
 
-USERINCLUDE	 ..\inc
+USERINCLUDE	 ..\inc ..\modules\Logger
 SYSTEMINCLUDE   \epoc32\include
 
 SOURCEPATH	  ..\src
@@ -25,7 +25,7 @@ DEBUGGABLE_UDEBONLY
 CAPABILITY Location
 
 SOURCEPATH ..\src
-SOURCE Positioning.cpp KeyCatcher.cpp TrackWriter.cpp Logger.cpp
+SOURCE Positioning.cpp KeyCatcher.cpp TrackWriter.cpp
 SOURCEPATH ..\data
 START RESOURCE GPSTrackerCLI.rss
 	TARGETPATH \resource\apps
@@ -37,3 +37,5 @@ START RESOURCE GPSTrackerCLI_reg.rss
 END
 SOURCEPATH ..\src
 SOURCE LBSSatelliteExtended.cpp XML.cpp
+SOURCEPATH ..\modules\Logger
+SOURCE Logger.cpp
