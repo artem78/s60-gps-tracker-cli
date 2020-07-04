@@ -14,7 +14,6 @@
 #include <e32std.h>
 #include <e32cons.h>			// Console
 #include <f32file.h>
-#include "Logger.h"
 #include <lbspositioninfo.h>
 #include "LBSSatelliteExtended.h"
 
@@ -57,6 +56,8 @@ CGPSTrackerCLI::~CGPSTrackerCLI()
 		}
 	
 #if LOGGING_ENABLED
+	LOG(_L8("Logging ended"));
+	delete iLogger;
 	iLogFile.Close();
 #endif
 	iFs.Close();
@@ -135,7 +136,9 @@ void CGPSTrackerCLI::InitializeLoggingL()
 	_LIT(KLogFileExtension, ".txt");
 	logFileName.Append(KLogFileExtension);
 	User::LeaveIfError(iLogFile.Replace(iFs, logFileName, EFileWrite));
-	LOG_CONFIGURE(iLogFile);
+	
+	iLogger = CLogger::NewL(iLogFile);
+	LoggerStatic::SetLogger(iLogger);
 	LOG(_L8("Logging started"));
 	}
 #endif

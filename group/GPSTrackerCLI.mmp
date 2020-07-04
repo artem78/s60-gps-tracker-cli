@@ -17,7 +17,7 @@ SYSTEMINCLUDE   \epoc32\include
 SOURCEPATH	  ..\src
 SOURCE		  GPSTrackerCLI.cpp
 
-LIBRARY		 euser.lib lbs.lib efsrv.lib charconv.lib bafl.lib
+LIBRARY		 euser.lib lbs.lib efsrv.lib charconv.lib bafl.lib estor.lib
 
 #ifdef ENABLE_ABIV2_MODE
 DEBUGGABLE_UDEBONLY

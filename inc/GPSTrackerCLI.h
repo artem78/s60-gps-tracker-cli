@@ -16,6 +16,7 @@
 #include <e32cons.h>
 
 #include <LoggingDefs.h>
+#include "Logger.h"
 #include "Positioning.h"
 #include "TrackWriter.h"
 #include "KeyCatcher.h"
@@ -55,6 +56,7 @@ private:
 	
 #if LOGGING_ENABLED
 	RFile iLogFile;
+	CLogger* iLogger;
 	void InitializeLoggingL();
 #endif
 	RFile iTrackFile;
