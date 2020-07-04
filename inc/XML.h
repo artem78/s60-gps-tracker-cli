@@ -15,6 +15,7 @@
 #include <e32std.h>
 #include <e32base.h>
 #include <f32file.h>
+#include <s32file.h>
 #include <badesca.h>
 
 // FORWARD DECLARATION
@@ -90,14 +91,14 @@ private:
 		ETagBody
 		};
 	
-	RFile iFile;
+	RFileBuf iFileBuf;
 	CDesCArraySeg* iTagStack;
 	TBool iIsPrettyPrint;
 	TWriterState iState;
 	TInt iClosingTagsInARow;
 	
 	/* Encodes string to output charset and writes to the file.
-	 * Do not use directly iFile.Write(...), use this method instead.
+	 * Note: Do not write directly to iFileBuf, use this method instead.
 	 */
 	void WriteL(const TDesC &aDes);
 	

@@ -199,6 +199,7 @@ void CGPXTrackWriter::AddPointL(const TPositionInfo* aPosInfo)
 		}
 	
 	iXml->CloseTagL(); // </trkpt>
+	// ToDo: Flush xml`s file buffer to disk after each track point writed
 	}
 
 void CGPXTrackWriter::StartNewSegmentL()

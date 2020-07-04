@@ -15,15 +15,17 @@
 // CSimpleXMLWriter
 
 CSimpleXMLWriter::CSimpleXMLWriter(RFile &aFile, TBool anIsPrettyPrint) :
-		iFile(aFile),
 		iIsPrettyPrint(anIsPrettyPrint)
 	{
-	// No implementation required
+	iFileBuf.Attach(aFile, 0);
 	}
 
 CSimpleXMLWriter::~CSimpleXMLWriter()
 	{
 	delete iTagStack;
+	iFileBuf.Synch();
+	iFileBuf.Detach(); // Prevent to close file with file buffer
+	iFileBuf.Close();
 	}
 
 CSimpleXMLWriter* CSimpleXMLWriter::NewLC(RFile &aFile, const TXMLVersion &aXMLVersion,
@@ -177,7 +179,9 @@ void CSimpleXMLWriter::WriteL(const TDesC &aDes)
 	HBufC8* buff = CnvUtfConverter::ConvertFromUnicodeToUtf8L(aDes);
 	CleanupStack::PushL(buff);
 	
-	User::LeaveIfError(iFile.Write(*buff));
+	TRequestStatus stat;
+	iFileBuf.WriteL(*buff, stat);
+	User::WaitForRequest(stat);
 	
 	CleanupStack::PopAndDestroy(buff);
 	}
