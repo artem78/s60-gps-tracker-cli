@@ -48,3 +48,6 @@ This software is released under [GNU GPLv3 license](/LICENSE.txt).
 
 ## Author`s notes
 This software was originally created for personal use on my old Nokia phone. I will be glad, if it will be usefull for anyone else.
+
+## See also
+* [GUI version of GPS Tracker](https://github.com/artem78/gps-tracker)
