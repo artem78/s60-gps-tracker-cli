@@ -37,7 +37,7 @@ Tracks save to GPX files in directory `C:\data\GPSTracker\tracks\` or `E:\data\G
 If you find any bug or want to suggest an idea, you can [contact me](#author) or write to the [issue page](../../../issues).
 
 ## Future plans
-* Make graphical user interface
+* [x] ~Make graphical user interface~ ([here](https://github.com/artem78/s60-gps-tracker))
 * Saving to other formats (KML, NMEA, etc...)
 
 ## Author
@@ -48,3 +48,6 @@ This software is released under [GNU GPLv3 license](/LICENSE.txt).
 
 ## Author`s notes
 This software was originally created for personal use on my old Nokia phone. I will be glad, if it will be usefull for anyone else.
+
+## See also
+* [The same program with graphical user interface](https://github.com/artem78/s60-gps-tracker)
